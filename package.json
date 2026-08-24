@@ -1,0 +1,39 @@
+{
+  "name": "delta-comic-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "homepage": "https://github.com/delta-comic",
+  "bugs": {
+    "url": "https://github.com/delta-comic/delta-comic-native/issues",
+    "email": "wenxinguo12@gmail.com"
+  },
+  "license": "AGPL-3.0-only",
+  "author": {
+    "name": "wenxig",
+    "email": "wenxinguo12@gmail.com",
+    "url": "https://github.com/wenxig"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/delta-comic/delta-comic-native.git"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/release-notes-generator": "^15.0.0-beta.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "commitlint-plugin-cspell": "^0.9.4",
+    "eslint-plugin-tailwindcss": "^4.4.0",
+    "cspell": "^10.0.1",
+    "oxlint-tsgolint": "^7.0.2001",
+    "semantic-release": "^25.0.7",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "badges": [],
+  "packageManager": "pnpm@12.0.0-rc.3",
+  "readme": "./README.md"
+}

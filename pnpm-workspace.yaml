@@ -1,0 +1,29 @@
+packages:
+  - packages/*
+
+allowBuilds:
+  "@swc/core": true
+
+catalog:
+  "@swc/core": ^1.16.0
+  rolldown-plugin-dts: ^0.28.2
+  "@octokit/rest": ^22.0.1
+  "@tailwindcss/vite": ^4.3.3
+  "@types/node": 26.2.0
+  semver: ^7.8.5
+  tailwind-merge: ^3.6.0
+  tailwindcss: ^4.3.3
+  typescript: ^7.0.2
+  vite: npm:@voidzero-dev/vite-plus-core@^0.3.0
+  vite-plus: ^0.3.0
+overrides:
+  typescript: ^7.0.2
+  vite: "catalog:"
+
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: "*"
+    vitest: "*"

@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "target": "ESNext",
+    "module": "nodenext",
+    "skipLibCheck": true,
+    /* Bundler mode */
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/app/tsconfig.node.json"
+    },
+  ]
+}

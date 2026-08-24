@@ -1,0 +1,15 @@
+{
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.codeActionsOnSave": { "source.fixAll.oxc": "explicit" },
+  "vue.suggest.componentNameCasing": "alwaysPascalCase",
+  "vue.suggest.propNameCasing": "alwaysCamelCase",
+  "tailwindCSS.classFunctions": ["twMerge", "cn"],
+  "tailwindCSS.classAttributes": ["class", "className", "ngClass", "class:list", ":class"],
+  "[markdown]": { "editor.defaultFormatter": "DavidAnson.vscode-markdownlint" },
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "i18n-ally.localesPaths": ["packages/app/src/i18n", "packages/app/src/i18n/locales"],
+  "js/ts.experimental.useTsgo": false
+}
