@@ -135,4 +135,26 @@ vp install（+17 包）/ vp lint / vp run -r typecheck（14 任务）/ vp test�
 - vp run typecheck --filter 会透传 filter 给 tsc OOM；单包验证用包内 npx tsc --noEmit。
 
 ### 下一步
-Phase 6 Shell 与导航。
+Phase 7 AI 调试通道（Dev MCP）。
+
+## Phase 6：Shell 与导航（2026-08-25）
+
+### 提交
+- 87a48ed navigation 包脚手架 + 路由 key/深链/linking 纯函数与单测（catalog 补 @react-navigation/native、native-stack、bottom-tabs ^7）
+- d095940 linking 支持 tab 路由嵌套分组；a880ec2 平铺层排除已嵌套 tab
+- 8169ff4 RouteScreen 契约返回 ReactNode，react 升 peerDep 外置 dts 类型
+- 2839207+ac1bb9e linking 类型面对齐 React Navigation；32916f7 ui-shell 六区组件与 RootNavigator；4c56e3c lint/fmt 清理
+
+### 实现
+- @delta-comic/navigation：keys.ts（品牌化 RouteKey/buildRouteKey/parseRouteKey/Routes 增强基线/RouteTarget 分布式条件）；deeplink.ts（delta-comic:// 双向映射手写解析）；linking.ts（buildLinkingConfig，tab 挂 'tabs' 分组）；service.ts（RouteRegistryService register/has/keys/resolveScreen + NavigationService attach/navigate/goBack/canGoBack fail loud + Events 'navigation/navigate'）
+- @delta-comic/ui-shell：app-shell.tsx（六区骨架+ModalHost 占位）、top-bar.tsx（头像/胶囊搜索/扫码/公告）、bottom-navigation.tsx（四槽+中央凸起粉 FAB，固定四常规槽校验）、tab-routes.ts（TAB_ROUTE_KEYS=core/home|follow|bookshelf|mine + splitTabRoutes 纯函数）、root-navigator.tsx（NavigationContainer+native-stack 栈+bottom-tabs 容器+自定义 ShellTabBar+命令面适配器绑定 ctx.navigation+linking 接入）
+
+### 关键事实
+- dts 打包撞 @types/react（CommonJS dts 不能内联）——类型层依赖 react 时须声明 peerDependencies 使 rolldown-plugin-dts 外置
+- React Navigation LinkingOptions.prefixes 为可变 string[]；screens 嵌套分组需含 path 可选字段否则 weak type 检查拒绝
+- uniwind className 增强在包入口 `import type {} from 'uniwind/types'` 一次即对全包生效
+- oxlint vitest(require-mock-type-parameters) 强制 vi.fn<T>()；tailwindcss(classnames-order) 由 vp fmt 自动排序
+- workspace:* 消费方 TS 走 dist/index.d.ts（types 条件），改 core 导出后必须重新 vp pack 才对下游生效
+
+### 下一步
+Phase 7 AI 调试通道（Dev MCP）。

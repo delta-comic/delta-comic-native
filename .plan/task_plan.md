@@ -40,7 +40,7 @@
 - 恢复界面（错误详情/导出诊断/卸载）
 
 ### Phase 6: Shell 与导航
-**Status:** pending
+**Status:** complete（commit 见 progress.md）
 - AppShell 六区组件 + BottomNavigation 五 tab
 - RouteRegistry + NavigationService（React Navigation v7 native-stack）+ 深链 resolver + Web URL 同步
 
@@ -95,4 +95,4 @@
 |-------|---------|------------|
 
 ## Next Step
-Phase 6：Shell 与导航（AppShell 六区组件 + BottomNavigation 五 tab；RouteRegistry + NavigationService + 深链 resolver + Web URL 同步）。
+Phase 7：AI 调试通道（Dev MCP）。
