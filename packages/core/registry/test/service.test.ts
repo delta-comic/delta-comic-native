@@ -116,3 +116,32 @@ describe('UIRegistryService', () => {
     expect(ctx.uiRegistry.get('ui/banner')()).toBe('hi')
   })
 })
+describe('UIRegistryService.entries', () => {
+  it('投影全部分层 key 与条目元数据，注销后同步消失', () => {
+    const service = createService()
+    service.register('ui/button', { id: 'core', version: '1.0.0', component: () => 'a' })
+    const disposable = service.register('ui/banner', {
+      id: 'ext',
+      version: '2.1.0',
+      priority: 5,
+      component: () => 'b',
+    })
+    expect(service.entries()).toEqual([
+      {
+        key: 'ui/button',
+        items: [{ id: 'core', version: '1.0.0', priority: 0 }],
+      },
+      {
+        key: 'ui/banner',
+        items: [{ id: 'ext', version: '2.1.0', priority: 5 }],
+      },
+    ])
+
+    disposable()
+    expect(service.entries().map(entry => entry.key)).toEqual(['ui/button'])
+  })
+
+  it('空注册表返回空数组', () => {
+    expect(createService().entries()).toEqual([])
+  })
+})

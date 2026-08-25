@@ -5,4 +5,4 @@
  * - UIRegistryService：类型化 get<K>、注册/覆盖声明校验
  * - module augmentation 基线见 @delta-comic/protocol 的 UIRegistry
  */
-export { UIRegistryService } from './service'
+export { UIRegistryService, type UIRegistryEntryProjection } from './service'

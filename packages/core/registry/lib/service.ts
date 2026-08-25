@@ -20,6 +20,12 @@ interface UIEntry {
   resolve(): unknown
 }
 
+/** 注册表投影条目（调试通道 registry_list 数据源），不含组件引用。 */
+export interface UIRegistryEntryProjection {
+  readonly key: string
+  readonly items: readonly { id: string; version: string; priority: number }[]
+}
+
 export class UIRegistryService extends Service {
   private readonly buckets = new Map<string, Map<string, UIEntry>>()
 
@@ -88,6 +94,18 @@ export class UIRegistryService extends Service {
       current.delete(registration.id)
       if (current.size === 0) this.buckets.delete(key)
     }
+  }
+
+  /** 全部注册项的只读投影，key 按 Map 插入顺序排列。 */
+  entries(): readonly UIRegistryEntryProjection[] {
+    return [...this.buckets.entries()].map(([key, bucket]) => ({
+      key,
+      items: [...bucket.values()].map(entry => ({
+        id: entry.id,
+        version: entry.version,
+        priority: entry.priority,
+      })),
+    }))
   }
 }
 

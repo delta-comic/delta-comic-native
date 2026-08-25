@@ -73,6 +73,36 @@ export class PluginLoaderService extends Service {
     return slot === undefined ? undefined : this.toRecord(slot)
   }
 
+  /** 插件 manifest 原文（未发现入口时 undefined）。 */
+  manifestOf(id: string): unknown {
+    return this.slots.get(id)?.discovered?.manifest
+  }
+
+  /** 重载插件：停旧 fiber 后重走激活；失败进入 disabled 并落盘。 */
+  async reload(id: string): Promise<void> {
+    const slot = this.slots.get(id)
+    if (slot === undefined) throw new Error(`插件不存在：${id}`)
+    if (slot.state !== 'active') throw new Error(`仅 active 插件可重载，当前状态：${slot.state}`)
+    const fiber = slot.fiber
+    if (fiber !== undefined) await fiber.dispose()
+    slot.fiber = undefined
+    await this.activate(slot)
+  }
+
+  /** 停用插件：卸载 fiber 并持久化 disabled，重启后保持跳过。 */
+  async disable(id: string): Promise<void> {
+    const slot = this.slots.get(id)
+    if (slot === undefined) throw new Error(`插件不存在：${id}`)
+    if (slot.state !== 'active' && slot.state !== 'unavailable') {
+      throw new Error(`仅 active/unavailable 插件可停用，当前状态：${slot.state}`)
+    }
+    const fiber = slot.fiber
+    if (fiber !== undefined) await fiber.dispose()
+    slot.fiber = undefined
+    this.advance(slot, 'disabled')
+    await this.persist(slot)
+  }
+
   async start(options: PluginLoaderStartOptions): Promise<void> {
     this.db = options.db
     await applyMigrations(options.db, coreMigrations)
