@@ -34,6 +34,7 @@ export function buildLinkingConfig(input: LinkingConfigInput): LinkingConfig {
     screens.tabs = { screens: tabPatterns }
   }
   for (const key of input.routes) {
+    if (key in tabPatterns) continue
     screens[key] = key
   }
   return { prefixes: [...input.prefixes], config: { screens } }
