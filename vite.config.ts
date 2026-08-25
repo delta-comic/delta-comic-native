@@ -8,7 +8,7 @@ import fmt from './.oxfmtrc.json' with { type: 'json' }
 import lint from './.oxlintrc.json' with { type: 'json' }
 
 const lintConfig = lint as OxlintConfig
-const uiTailwindConfigPath = resolve(import.meta.dirname, 'packages/ui/src/index.css')
+const uiTailwindConfigPath = resolve(import.meta.dirname, 'packages/ui/theme/lib/theme.css')
 
 export default defineConfig({
   staged: {
@@ -22,19 +22,7 @@ export default defineConfig({
   },
   run: {
     cache: { tasks: true, scripts: false },
-    tasks: {
-      'release:preview': { command: 'node ./script/release-branches.mts preview', cache: false },
-      'release:preview:dry-run': {
-        command: 'node ./script/release-branches.mts preview --dry-run',
-        cache: false,
-      },
-      'release:stable': { command: 'node ./script/release-branches.mts stable', cache: false },
-      'release:stable:dry-run': {
-        command: 'node ./script/release-branches.mts stable --dry-run',
-        cache: false,
-      },
-      'typecheck': { command: 'vp run -r typecheck', dependsOn: ['lib-build'], output: [] },
-    },
+    tasks: { typecheck: { command: 'vp run -r typecheck', output: [] } },
   },
   test: {
     clearMocks: true,
@@ -45,16 +33,20 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html', 'lcov'],
       reportsDirectory: './coverage',
-      include: [
-      ],
-      exclude: [
-      ],
+      include: [],
+      exclude: [],
       thresholds: { lines: 60, functions: 60, branches: 55, statements: 60 },
     },
     exclude: ['**/node_modules/**', '**/.git/**', '.agents/**'],
     projects: [
       { test: { name: 'root', environment: 'node', include: ['script/test/**/*.test.ts'] } },
-      
+      {
+        test: {
+          name: 'packages',
+          environment: 'node',
+          include: ['packages/*/*/test/**/*.test.ts'],
+        },
+      },
     ],
   },
 })

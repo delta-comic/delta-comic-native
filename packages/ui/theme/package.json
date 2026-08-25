@@ -1,0 +1,17 @@
+{
+  "name": "@delta-comic/ui-theme",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./lib/index.ts",
+    "./theme.css": "./lib/theme.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

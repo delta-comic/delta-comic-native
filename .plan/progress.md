@@ -13,7 +13,24 @@
 - 本 session：`docs/architecture.md` + planning 三件套落盘。
 
 ### 进行中
-- Phase 2 包骨架搭建未开始。
+- Phase 3 核心协议包未开始。
 
 ### 备注
 - 全程 Plan Mode 只读讨论后转入 build 落盘；所有决策同步至 project memory。
+
+## Session 2026-08-25（Phase 2 包骨架）
+
+### 已完成
+- workspace catalog 补齐核心依赖：cordis 4.0.0-rc / @cordisjs/plugin-timer / kysely 0.29 / @sinclair/typebox 0.34（npm 尚无 v1.x，0.34 已满足 Static+Value.Check）/ react 19.2.8 全家桶 / RN 0.87 + web/macos/windows 各自版本线 / nativewind 5.0.0-preview.4（dist-tag preview）+ react-native-css / expo-image / ky / vitest。
+- 七个包骨架落盘（均 1.0.0、exports 直指源码 lib/index.ts、typecheck script）：
+  - packages/core/{protocol,registry,db,loader}；loader 以 workspace:* 依赖其余三个。
+  - packages/ui/theme（含 lib/theme.css：--dc-* token + @theme inline 映射，深色基准 + .dc-light 同构）、ui/button、ui/list。
+- 根配置接线：vitest 新增 packages 工程（include packages/*/*/test/**）；lint tailwindcss cssConfigPath 指向 theme.css；cspell 词表补 cordis/kysely/typebox/nativewind/opfs/hermes。
+- 冒烟测试 2 个通过：protocol 版本断言 + loader 跨包解析验证。
+- 清理上次架构提交（86999c6）删除 script/ 目录后的死引用：release.config.ts 删除（semantic-release 依赖早已不在 devDeps）、vite.config release:* 任务与 typecheck 的 dependsOn lib-build 移除。发布流水线归 Phase 11 在 scripts/* 包模式下重建。
+
+### 验证
+vp install / vp lint / vp run -r typecheck（7 包全绿）/ vp test（2 passed）全部通过。
+
+### 下一步
+Phase 3 核心协议包：manifest TypeBox schema + 运行时校验、plugin contract 公开 interface（player 输入协议挂点）、UIRegistryService 类型化 get<K> + module augmentation 基线。

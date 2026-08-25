@@ -1,1 +1,7 @@
 wenxig
+cordis
+kysely
+typebox
+nativewind
+opfs
+hermes

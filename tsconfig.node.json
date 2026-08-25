@@ -11,9 +11,5 @@
     "isolatedModules": true
   },
   "files": [],
-  "references": [
-    {
-      "path": "./packages/app/tsconfig.node.json"
-    },
-  ]
+  "references": [{ "path": "./packages/app/tsconfig.node.json" }]
 }

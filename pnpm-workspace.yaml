@@ -3,28 +3,56 @@ packages:
   - scripts/*
 
 allowBuilds:
-  "@swc/core": true
+  '@swc/core': true
+  esbuild: true
 
 catalog:
-  "@swc/core": ^1.16.0
+  '@swc/core': ^1.16.0
   rolldown-plugin-dts: ^0.28.2
-  "@octokit/rest": ^22.0.1
-  "@tailwindcss/vite": ^4.3.3
-  "@types/node": 26.2.0
+  '@octokit/rest': ^22.0.1
+  '@tailwindcss/vite': ^4.3.3
+  '@types/node': 26.2.0
   semver: ^7.8.5
   tailwind-merge: ^3.6.0
   tailwindcss: ^4.3.3
   typescript: ^7.0.2
   vite: npm:@voidzero-dev/vite-plus-core@^0.3.0
   vite-plus: ^0.3.0
+  cordis: ^4.0.0-rc.8
+  '@cordisjs/plugin-timer': ^1.1.2
+  kysely: ^0.29.5
+  '@sinclair/typebox': ^0.34.52
+  react: ^19.2.8
+  react-dom: ^19.2.8
+  '@types/react': ^19.2.18
+  react-native: 0.87.0
+  react-native-web: ^0.21.2
+  react-native-macos: 0.81.9
+  react-native-windows: 0.84.0
+  nativewind: 5.0.0-preview.4
+  react-native-css: ^3.0.1
+  expo-image: ^57.0.3
+  ky: ^2.0.2
+  vitest: ^4.1.11
+minimumReleaseAgeExclude:
+  - '@voidzero-dev/vite-plus-core@0.3.0'
+  - '@voidzero-dev/vite-plus-darwin-arm64@0.3.0'
+  - '@voidzero-dev/vite-plus-darwin-x64@0.3.0'
+  - '@voidzero-dev/vite-plus-linux-arm64-gnu@0.3.0'
+  - '@voidzero-dev/vite-plus-linux-arm64-musl@0.3.0'
+  - '@voidzero-dev/vite-plus-linux-x64-gnu@0.3.0'
+  - '@voidzero-dev/vite-plus-linux-x64-musl@0.3.0'
+  - '@voidzero-dev/vite-plus-win32-arm64-msvc@0.3.0'
+  - '@voidzero-dev/vite-plus-win32-x64-msvc@0.3.0'
+  - vite-plus@0.3.0
 overrides:
   typescript: ^7.0.2
-  vite: "catalog:"
+  vite: 'catalog:'
 
 peerDependencyRules:
   allowAny:
     - vite
     - vitest
   allowedVersions:
-    vite: "*"
-    vitest: "*"
+    vite: '*'
+    vitest: '*'

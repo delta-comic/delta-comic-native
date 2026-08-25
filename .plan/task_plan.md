@@ -15,8 +15,8 @@
 - docs/architecture.md、task_plan.md、findings.md、progress.md 写入并提交
 
 ### Phase 2: Monorepo 包骨架
-**Status:** pending
-- packages 分组结构：core/*（协议、registry、db、loader）、ui/*（button/list…）、plugins/*
+**Status:** complete
+- packages 分组结构：core/*（协议、registry、db、loader）、ui/*（theme/button/list…）、plugins/*
 - workspace catalog 补充核心依赖（cordis、kysely、@sinclair/typebox、react-navigation 等）
 
 ### Phase 3: 核心协议包
@@ -86,4 +86,4 @@
 |-------|---------|------------|
 
 ## Next Step
-Phase 2：搭建 Monorepo 包骨架（packages/core/*、ui/* 分组结构与 workspace catalog 依赖补充）。
+Phase 3：核心协议包（manifest TypeBox schema + runtime 校验、plugin contract 公开 interface、UIRegistryService 类型化 get<K> + module augmentation 基线）。

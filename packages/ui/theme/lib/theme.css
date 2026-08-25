@@ -1,0 +1,39 @@
+/*
+ * Delta Comic 设计 token（唯一视觉基准：docs/design-language.md）。
+ * 深色为基准主题，浅色同构映射；品牌粉=交互语义，工具蓝=工具语义。
+ */
+:root {
+  --dc-brand: #ff6699;
+  --dc-brand-strong: #fb7299;
+  --dc-brand-muted: rgba(255, 102, 153, 0.12);
+  --dc-tool: #4fc3f7;
+  --dc-warning: #ffd54f;
+  --dc-bg: #121212;
+  --dc-surface: #1e1e22;
+  --dc-media-bg: #000000;
+  --dc-text-primary: #ffffff;
+  --dc-text-secondary: #9e9e9e;
+  --dc-divider: rgba(255, 255, 255, 0.08);
+}
+
+.dc-light {
+  --dc-bg: #ffffff;
+  --dc-surface: #f5f5f5;
+  --dc-text-primary: #111111;
+  --dc-text-secondary: #757575;
+  --dc-divider: rgba(0, 0, 0, 0.08);
+}
+
+@theme inline {
+  --color-brand: var(--dc-brand);
+  --color-brand-strong: var(--dc-brand-strong);
+  --color-brand-muted: var(--dc-brand-muted);
+  --color-tool: var(--dc-tool);
+  --color-warning: var(--dc-warning);
+  --color-bg: var(--dc-bg);
+  --color-surface: var(--dc-surface);
+  --color-media-bg: var(--dc-media-bg);
+  --color-text-primary: var(--dc-text-primary);
+  --color-text-secondary: var(--dc-text-secondary);
+  --color-divider: var(--dc-divider);
+}

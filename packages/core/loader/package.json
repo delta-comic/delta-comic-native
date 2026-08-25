@@ -1,0 +1,22 @@
+{
+  "name": "@delta-comic/loader",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./lib/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@delta-comic/db": "workspace:*",
+    "@delta-comic/protocol": "workspace:*",
+    "@delta-comic/registry": "workspace:*",
+    "cordis": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

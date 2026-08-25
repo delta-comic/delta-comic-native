@@ -1,32 +1,20 @@
 {
-  "ignorePatterns": [
-    ".agents/**",
-    "components.d.ts",
-    "*.md"
-  ],
+  "ignorePatterns": [".agents/**", "components.d.ts", "*.md"],
   "endOfLine": "lf",
   "semi": false,
   "useTabs": false,
   "printWidth": 100,
   "tabWidth": 2,
   "singleQuote": true,
-  "sortPackageJson": {
-    "sortScripts": true
-  },
+  "sortPackageJson": { "sortScripts": true },
   "arrowParens": "avoid",
   "jsxSingleQuote": true,
   "singleAttributePerLine": false,
   "sortTailwindcss": {
     "preserveDuplicates": true,
     "preserveWhitespace": true,
-    "attributes": [
-      "classname",
-      "Class"
-    ],
-    "functions": [
-      "twMerge",
-      "cn"
-    ]
+    "attributes": ["classname", "Class"],
+    "functions": ["twMerge", "cn"]
   },
   "bracketSameLine": false,
   "bracketSpacing": true,
@@ -39,29 +27,12 @@
   "trailingComma": "all",
   "sortImports": {
     "groups": [
-      [
-        "builtin"
-      ],
-      [
-        "external",
-        "type-external"
-      ],
-      [
-        "internal",
-        "type-internal"
-      ],
-      [
-        "parent",
-        "type-parent"
-      ],
-      [
-        "sibling",
-        "type-sibling"
-      ],
-      [
-        "index",
-        "type-index"
-      ]
+      ["builtin"],
+      ["external", "type-external"],
+      ["internal", "type-internal"],
+      ["parent", "type-parent"],
+      ["sibling", "type-sibling"],
+      ["index", "type-index"]
     ]
   }
 }
