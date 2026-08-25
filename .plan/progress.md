@@ -68,3 +68,20 @@ Phase 3 核心协议包：manifest TypeBox schema + 运行时校验、plugin con
 
 ### 下一步
 Phase 4 数据层基础设施：TypeBox 表 DSL -> snapshot -> diff -> up/down .sql 编译器、Static 推导 Kysely Database 类型、migration registry。
+
+## Session 2026-08-25（Phase 4 数据层基础设施）
+
+### 落地（packages/core/db）
+- ffe3e95 表 DSL+snapshot+diff+SQL 编译器：显式列 builder（text/integer/real/bigText/bool，notNull 泛型字面量推导 TableRow/DatabaseOf）；AnyTableDef 运行时视图规避泛型不变性；diff 分类 additive/destructive/rebuild；SQLite DDL emit（ADD COLUMN NOT NULL 缺 default 显式抛错、UNIQUE ADD COLUMN 拒绝、rebuild=建临时表-拷贝-DROP-RENAME）；down 对称编译。
+- 3aba6bf 雪花 ID：41|10|12 位布局、BigInt 十进制 TEXT、序列溢出向未来借位、时钟回拨沿用最后时间戳。
+- d88fb65+ae10f17 Kysely node:sqlite driver（多语句分号契约走 exec、boolean 绑定转 0/1、SQLInputValue 收窄）+ migration registry（(pluginId,n) 唯一、Kahn 拓扑+环检测、ledger 幂等增量应用）。
+- 260c554 Store 统一事务+ChangeBus（commit 后整批发布、失败零事件）+rowCodec（显式点名 bigint→TEXT 十进制、boolean→0/1，Stored<T> 映射类型直通 InsertExpression，fromStorage Value.Check 校验）；DatabaseTables module augmentation 挂点+observe typed observation。
+
+### 关键事实
+- @types/node 的 SQLInputValue 不含 boolean；node:sqlite prepare 单语句、exec 多语句无绑定。
+- oxlint type-aware 全仓 program 会吃到 test 的 declare module 合并，lib 内 keyof DatabaseTables & string 触发 no-redundant-type-constituents（去掉 & string）。
+- tsconfig types:['node'] 使 oxlint 解析到 node:sqlite 类型。
+- 泛型 TableDef 因 keyof primaryKey 不变：消费方用 AnyTableDef 宽化。
+
+### 下一步
+Phase 5 启动链路：loader plugin 发现/校验/依赖图/migration 排序/Cordis activation、插件状态机、恢复界面。

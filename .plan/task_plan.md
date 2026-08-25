@@ -26,7 +26,7 @@
 - UIRegistryService 类型化 get<K> + module augmentation 基线
 
 ### Phase 4: 数据层基础设施
-**Status:** pending
+**Status:** complete
 - TypeBox 表 DSL -> snapshot -> diff -> up/down .sql 编译器（自研仅此一层）
 - Kysely 集成 + plugin migration registry（唯一 ID/拓扑排序/统一 ledger/增量迁移）
 - 类型化 Repository + 统一事务 + change batch -> change bus -> typed observation
