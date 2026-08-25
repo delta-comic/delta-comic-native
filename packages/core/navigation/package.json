@@ -17,13 +17,13 @@
     "cordis": "catalog:",
     "semver": "catalog:"
   },
-  "peerDependencies": {
-    "react": "catalog:"
-  },
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/semver": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
   }
 }

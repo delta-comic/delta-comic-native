@@ -159,7 +159,10 @@ export async function applyMigrations(
 /** 读取 ledger 全量已应用记录（ensureLedger 幂等）。 */
 export async function readLedger(db: AnyKysely): Promise<AppliedMigration[]> {
   await ensureLedger(db)
-  const rows = await db.selectFrom(MIGRATION_LEDGER_TABLE).select(['plugin_id', 'n', 'name']).execute()
+  const rows = await db
+    .selectFrom(MIGRATION_LEDGER_TABLE)
+    .select(['plugin_id', 'n', 'name'])
+    .execute()
   return rows.map(({ plugin_id, n, name }) => ({ pluginId: plugin_id, n, name }))
 }
 

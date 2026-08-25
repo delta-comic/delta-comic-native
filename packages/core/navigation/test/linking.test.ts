@@ -23,7 +23,7 @@ describe('buildLinkingConfig', () => {
       tabRoutes: [buildRouteKey('core', 'home')],
     })
     expect(config.config.screens).toEqual({
-      tabs: { screens: { 'core/home': 'core/home' } },
+      'tabs': { screens: { 'core/home': 'core/home' } },
       'core/search': 'core/search',
     })
   })

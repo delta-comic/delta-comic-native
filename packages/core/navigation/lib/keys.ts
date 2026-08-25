@@ -44,6 +44,6 @@ export function parseRouteKey(key: RouteKey): ParsedRouteKey {
  * 类型化导航目标：name 段必须已在 Routes 中声明。
  * 例：Routes 声明 search: { query: string } 后，'core/search' 合法而 'core/nope' 编译报错。
  */
-export type RouteTarget = {
-  readonly [K in keyof Routes & string]: `${string}/${K}`
-}[keyof Routes & string]
+export type RouteTarget<K extends keyof Routes = keyof Routes> = K extends keyof Routes
+  ? `${string}/${K & string}`
+  : never

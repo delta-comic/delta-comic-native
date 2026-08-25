@@ -97,11 +97,7 @@ describe('migration registry', () => {
 
   it('topoSortIds 保持无依赖时字典序稳定', () => {
     expect(topoSortIds(['c', 'a', 'b'])).toEqual(['a', 'b', 'c'])
-    expect(
-      topoSortIds(['b', 'a'], {
-        a: ['b'],
-      }),
-    ).toEqual(['b', 'a'])
+    expect(topoSortIds(['b', 'a'], { a: ['b'] })).toEqual(['b', 'a'])
   })
 })
 

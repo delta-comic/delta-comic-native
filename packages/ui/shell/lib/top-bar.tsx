@@ -19,7 +19,7 @@ export interface TopBarProps {
 
 export function TopBar(props: TopBarProps) {
   return (
-    <View className='gap-3 bg-neutral-950 px-4 pb-2 pt-3'>
+    <View className='gap-3 bg-neutral-950 px-4 pt-3 pb-2'>
       <View className='flex-row items-center gap-3'>
         <Pressable onPress={props.onAvatarPress} className='active:opacity-70'>
           {props.avatarUri === undefined ? (

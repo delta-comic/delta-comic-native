@@ -143,7 +143,10 @@ interface ShellTabBarProps {
 /** 自定义 tabBar：把导航容器状态映射进五槽 BottomNavigation。 */
 function ShellTabBar(props: ShellTabBarProps) {
   const { state, navigation } = props.barProps
-  const items = props.tabKeys.map((key): BottomTabItem => ({ key, label: tabLabel(key, props.labels) }))
+  const items = props.tabKeys.map((key): BottomTabItem => ({
+    key,
+    label: tabLabel(key, props.labels),
+  }))
   if (items.length !== 4) return null
   const activeKey = state.routes[state.index]?.name ?? ''
   return (
@@ -161,7 +164,9 @@ function ShellTabBar(props: ShellTabBarProps) {
 
 function tabLabel(key: string, override: ShellTabBarProps['labels']): string {
   const index = TAB_ROUTE_KEYS.indexOf(key as TabRouteKey)
-  return (index >= 0 ? override?.[index] : undefined) ?? DEFAULT_TAB_LABELS[key as TabRouteKey] ?? key
+  return (
+    (index >= 0 ? override?.[index] : undefined) ?? DEFAULT_TAB_LABELS[key as TabRouteKey] ?? key
+  )
 }
 
 function TabPlaceholder(props: { readonly title: string }) {
@@ -184,8 +189,6 @@ function createPushEntry(registry: RouteRegistryService) {
     if (screen === undefined) return null
     // 存在类型还原点：params 仅经 navigate()/linking 写入且均受 Routes 约束，
     // 导航容器运行时回读宽类型，此处对齐注册表静态绑定的参数联合。
-    return createElement(screen, {
-      params: props.route.params as Routes[keyof Routes],
-    })
+    return createElement(screen, { params: props.route.params as Routes[keyof Routes] })
   }
 }

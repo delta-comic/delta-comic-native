@@ -6,7 +6,7 @@ import { NavigationService, RouteRegistryService, type NavigateEvent } from '../
 
 declare module '../lib/keys' {
   interface Routes {
-    search: { readonly query: string }
+    'search': { readonly query: string }
     'read-later': { readonly page: number }
   }
 }
@@ -18,7 +18,11 @@ async function createServices() {
   return ctx
 }
 
-const fakeCommands = () => ({ navigate: vi.fn(), goBack: vi.fn(), canGoBack: vi.fn(() => true) })
+const fakeCommands = () => ({
+  navigate: vi.fn<(name: string, params?: object) => void>(),
+  goBack: vi.fn<() => void>(),
+  canGoBack: vi.fn<() => boolean>(() => true),
+})
 
 describe('RouteRegistryService', () => {
   it('注册后可查询与取回屏幕', async () => {
@@ -46,9 +50,7 @@ describe('RouteRegistryService', () => {
     }
     ctx.routeRegistry.register(registration)
     expect(() => ctx.routeRegistry.register(registration)).toThrow('重复')
-    expect(() =>
-      ctx.routeRegistry.register({ ...registration, version: 'one' }),
-    ).toThrow(TypeError)
+    expect(() => ctx.routeRegistry.register({ ...registration, version: 'one' })).toThrow(TypeError)
   })
 
   it('keys 确定性排序', async () => {
@@ -110,9 +112,7 @@ describe('NavigationService', () => {
     const ctx = await createServices()
     ctx.navigation.attach(fakeCommands())
     const navigate = ctx.navigation.navigate.bind(ctx.navigation)
-    expect(() =>
-      Reflect.apply(navigate, null, ['garbage', {}]),
-    ).toThrow('路由未注册：garbage')
+    expect(() => Reflect.apply(navigate, null, ['garbage', {}])).toThrow('路由未注册：garbage')
   })
 
   it('重复绑定抛错；goBack/canGoBack 透传容器状态', async () => {

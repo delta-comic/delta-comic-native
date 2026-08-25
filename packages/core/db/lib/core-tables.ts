@@ -5,9 +5,9 @@
  * 供 loader 启动跳过与恢复界面读取；由表 DSL 编译出 up/down SQL。
  */
 import { defineTable, text, textNotNull, type DatabaseOf, type TableRow } from './dsl'
+import type { MigrationEntry } from './migrator'
 import { snapshotOf } from './snapshot'
 import { compileMigration } from './sql'
-import type { MigrationEntry } from './migrator'
 
 /** 插件持久化状态表；error 为 JSON 序列化的失败详情，无失败时为 null。 */
 export const pluginStateTable = defineTable('plugin_state', {

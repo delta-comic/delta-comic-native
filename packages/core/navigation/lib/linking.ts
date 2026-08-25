@@ -20,9 +20,7 @@ export type LinkingScreensEntry =
 
 export interface LinkingConfig {
   readonly prefixes: string[]
-  readonly config: {
-    readonly screens: Readonly<Record<string, LinkingScreensEntry>>
-  }
+  readonly config: { readonly screens: Readonly<Record<string, LinkingScreensEntry>> }
 }
 
 /** 由路由 key 集合生成确定性排序的 screens 配置。 */

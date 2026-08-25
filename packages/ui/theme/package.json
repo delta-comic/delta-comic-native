@@ -14,11 +14,11 @@
     "pack": "vp pack",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "uniwind": "catalog:"
+  },
   "devDependencies": {
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
-  },
-  "dependencies": {
-    "uniwind": "catalog:"
   }
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildRouteKey, isRouteKey } from '../lib/keys'
 import { formatDeepLink, parseDeepLink } from '../lib/deeplink'
+import { buildRouteKey, isRouteKey } from '../lib/keys'
 
 const key = () => buildRouteKey('my-plugin', 'read-later')
 
