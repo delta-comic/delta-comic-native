@@ -247,10 +247,9 @@ export const DB_SCHEMA_TOOL: DebugToolDefinition = {
       ledger: Type.Array(
         Type.Object(
           {
-            id: Type.String(),
+            id: Type.String({ description: 'pluginId/n' }),
             pluginId: Type.String(),
-            version: Type.String(),
-            appliedAt: Type.Number(),
+            version: Type.String({ description: '迁移名' }),
           },
           { additionalProperties: false },
         ),

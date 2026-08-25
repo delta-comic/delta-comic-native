@@ -41,7 +41,7 @@ export interface CaptureView {
   recentEvents(limit: number, namePrefix?: string): readonly unknown[]
 }
 
-export type DebugHandler = (params: Record<string, unknown>) => unknown | Promise<unknown>
+export type DebugHandler = (params: Record<string, unknown>) => Promise<unknown> | object | void
 
 const DEFAULT_LIMIT = 200
 
