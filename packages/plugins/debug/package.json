@@ -1,0 +1,31 @@
+{
+  "name": "@delta-comic/plugin-debug",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./lib/index.ts"
+    }
+  },
+  "scripts": {
+    "pack": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@delta-comic/db": "workspace:*",
+    "@delta-comic/loader": "workspace:*",
+    "@delta-comic/navigation": "workspace:*",
+    "@delta-comic/protocol": "workspace:*",
+    "@delta-comic/registry": "workspace:*",
+    "cordis": "catalog:",
+    "kysely": "catalog:",
+    "typebox": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
