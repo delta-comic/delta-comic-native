@@ -206,7 +206,7 @@ describe('插件更新回滚', () => {
     expect(
       (await readLedger(h.db)).filter(row => row.pluginId === 'base').map(row => row.n),
     ).toEqual([1])
-    expect(() => h.sqlite.prepare('SELECT label FROM base')).toThrow()
+    expect(() => h.sqlite.prepare('SELECT label FROM base')).toThrow('no such column: label')
     expect(await h.db.selectFrom('plugin_state').selectAll().execute()).toHaveLength(0)
   })
 
@@ -305,8 +305,7 @@ describe('插件更新回滚', () => {
       },
     )
 
-    await expect(h.service.update('base', v2)).rejects.toThrow()
-
+    await expect(h.service.update('base', v2)).rejects.toThrow('incomplete input')
     expect(entries).toBe(1)
     expect(h.service.getRecord('base')).toMatchObject({ version: '1.0.0', state: 'active' })
     expect(h.service.getRecord('base')?.failure).toBeUndefined()
