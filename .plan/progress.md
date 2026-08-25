@@ -158,3 +158,17 @@ Phase 7 AI 调试通道（Dev MCP）。
 
 ### 下一步
 Phase 7 AI 调试通道（Dev MCP）。
+
+## Phase 7：AI 调试通道（Dev MCP，2026-08-25）
+
+### 提交
+- protocol：线协议 TypeBox schemas + DEBUG_TOOLS 注册表14项（observe十/control四）
+- core：loader manifestOf/reload/disable + DatabaseService('database')；registry entries() 投影；三包 vp pack
+- plugin-debug：capture 环形捕获（logger.exporter+internal/dispatch）+ handlers 14工具 + DebugBridge WS 客户端（指数退避重连）+ isDevMode 门控 apply；.gitignore 追加 !packages/plugins/debug
+- dev-mcp：DeviceHub（127.0.0.1 /app?token= 配对、同 appId 顶替、请求 id 计数+超时）+ buildTools 门控过滤+审计 JSONL + createDevMcpServer（McpServer.registerTool+fromJsonSchema）+ serveStdio main；catalog 增 @modelcontextprotocol/server ^2.0.0/ws ^8.18/@types/ws；vite.config test projects 增 scripts/*/script/test/**；lint 清理 protocol 条件断言
+
+### 关键事实
+- MCP SDK v2：registerTool(name,{inputSchema:fromJsonSchema<T>(jsonSchema)})，TypeBox TSchema 单次 as JsonSchemaType 即过；serveStdio 来自 '@modelcontextprotocol/server/stdio' 返回 {close()}
+- ws RawData 消息须按 string/Buffer[]/ArrayBuffer 分支解码（no-base-to-string 强制）
+- vitest no-conditional-expect：判别联合用 toMatchObject({ok:false,issues:expect.any(Array)}) 替代 if 收窄后 expect
+- vp test 项目匹配以仓库根为基准：scripts/* 的测试放 scripts/x/script/test/ 并在根 vite.config projects 注册
