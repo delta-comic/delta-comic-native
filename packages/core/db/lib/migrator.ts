@@ -35,28 +35,28 @@ export function assertUniqueMigrations(entries: readonly MigrationEntry[]): void
   }
 }
 
-/** 插件依赖拓扑排序（Kahn）；环或未知依赖抛错。 */
-export function sortMigrations(
-  entries: readonly MigrationEntry[],
-  pluginDeps: Readonly<Record<string, readonly string[]>> = {},
-): AppliedMigration[] {
-  const ids = new Set(entries.map(entry => entry.pluginId))
+/** 通用依赖拓扑排序（Kahn）；环或未知依赖抛错，返回稳定升序 id 序列。 */
+export function topoSortIds(
+  ids: Iterable<string>,
+  deps: Readonly<Record<string, readonly string[]>> = {},
+): string[] {
+  const known = new Set(ids)
   const indegree = new Map<string, number>()
   const dependents = new Map<string, Set<string>>()
-  for (const id of ids) {
+  for (const id of known) {
     indegree.set(id, 0)
     dependents.set(id, new Set())
   }
-  for (const [id, deps] of Object.entries(pluginDeps)) {
-    if (!ids.has(id)) continue
-    for (const dep of deps) {
-      if (!ids.has(dep)) throw new Error(`未知 migration 依赖：${id} -> ${dep}`)
+  for (const [id, list] of Object.entries(deps)) {
+    if (!known.has(id)) continue
+    for (const dep of list) {
+      if (!known.has(dep)) throw new Error(`未知依赖：${id} -> ${dep}`)
       indegree.set(id, (indegree.get(id) ?? 0) + 1)
       dependents.get(dep)?.add(id)
     }
   }
 
-  let queue = [...ids].filter(id => (indegree.get(id) ?? 0) === 0).sort(compareId)
+  let queue = [...known].filter(id => (indegree.get(id) ?? 0) === 0).sort(compareId)
   const ordered: string[] = []
   while (queue.length > 0) {
     const id = queue.shift()
@@ -68,10 +68,20 @@ export function sortMigrations(
       if (left === 0) insertSorted(queue, next)
     }
   }
-  if (ordered.length !== ids.size) {
-    const stuck = [...ids].filter(id => !ordered.includes(id))
-    throw new Error(`migration 依赖存在环：${stuck.sort().join(', ')}`)
+  if (ordered.length !== known.size) {
+    const stuck = [...known].filter(id => !ordered.includes(id))
+    throw new Error(`依赖存在环：${stuck.sort().join(', ')}`)
   }
+  return ordered
+}
+
+/** 插件依赖拓扑排序（Kahn）；环或未知依赖抛错。 */
+export function sortMigrations(
+  entries: readonly MigrationEntry[],
+  pluginDeps: Readonly<Record<string, readonly string[]>> = {},
+): AppliedMigration[] {
+  const ids = new Set(entries.map(entry => entry.pluginId))
+  const ordered = topoSortIds(ids, pluginDeps)
   const rank = new Map(ordered.map((id, index) => [id, index]))
   return [...entries]
     .sort((a, b) => (rank.get(a.pluginId) ?? 0) - (rank.get(b.pluginId) ?? 0) || a.n - b.n)
@@ -122,9 +132,7 @@ export async function applyMigrations(
   pluginDeps: Readonly<Record<string, readonly string[]>> = {},
 ): Promise<AppliedMigration[]> {
   assertUniqueMigrations(entries)
-  await ensureLedger(db)
-  const applied = await db.selectFrom(MIGRATION_LEDGER_TABLE).select(['plugin_id', 'n']).execute()
-  const doneKeys = new Set(applied.map(row => `${row.plugin_id}/${row.n}`))
+  const doneKeys = new Set((await readLedger(db)).map(row => `${row.pluginId}/${row.n}`))
   const order = sortMigrations(entries, pluginDeps)
   const pending = entries.filter(entry => {
     if (doneKeys.has(`${entry.pluginId}/${entry.n}`)) return false
@@ -146,4 +154,37 @@ export async function applyMigrations(
     })
   }
   return pending.map(({ pluginId, n, name }) => ({ pluginId, n, name }))
+}
+
+/** 读取 ledger 全量已应用记录（ensureLedger 幂等）。 */
+export async function readLedger(db: AnyKysely): Promise<AppliedMigration[]> {
+  await ensureLedger(db)
+  const rows = await db.selectFrom(MIGRATION_LEDGER_TABLE).select(['plugin_id', 'n', 'name']).execute()
+  return rows.map(({ plugin_id, n, name }) => ({ pluginId: plugin_id, n, name }))
+}
+
+/**
+ * 按应用逆序执行 down 并删除对应 ledger 行（更新回滚用）；
+ * 空 down 视为无操作仍清账；未落账的条目跳过，已回退记录按回退顺序返回。
+ */
+export async function rollbackMigrations(
+  db: AnyKysely,
+  entries: readonly MigrationEntry[],
+): Promise<AppliedMigration[]> {
+  assertUniqueMigrations(entries)
+  const done = new Set((await readLedger(db)).map(row => `${row.pluginId}/${row.n}`))
+  const undone: AppliedMigration[] = []
+  for (const entry of [...entries].reverse()) {
+    if (!done.has(`${entry.pluginId}/${entry.n}`)) continue
+    await db.transaction().execute(async trx => {
+      if (entry.down.trim() !== '') await sql.raw(entry.down).execute(trx)
+      await trx
+        .deleteFrom(MIGRATION_LEDGER_TABLE)
+        .where('plugin_id', '=', entry.pluginId)
+        .where('n', '=', entry.n)
+        .execute()
+    })
+    undone.push({ pluginId: entry.pluginId, n: entry.n, name: entry.name })
+  }
+  return undone
 }

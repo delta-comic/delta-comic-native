@@ -8,7 +8,10 @@ import { defineTable, text, textNotNull } from '../lib/dsl'
 import {
   applyMigrations,
   assertUniqueMigrations,
+  readLedger,
+  rollbackMigrations,
   sortMigrations,
+  topoSortIds,
   type MigrationEntry,
 } from '../lib/migrator'
 import { snapshotOf } from '../lib/snapshot'
@@ -90,5 +93,71 @@ describe('migration registry', () => {
   it('未知依赖抛错', () => {
     const entries = [entry('', 1, 'a')]
     expect(() => sortMigrations(entries, { a: ['ghost'] })).toThrow('未知')
+  })
+
+  it('topoSortIds 保持无依赖时字典序稳定', () => {
+    expect(topoSortIds(['c', 'a', 'b'])).toEqual(['a', 'b', 'c'])
+    expect(
+      topoSortIds(['b', 'a'], {
+        a: ['b'],
+      }),
+    ).toEqual(['b', 'a'])
+  })
+})
+
+describe('ledger 读取与 down 回滚', () => {
+  it('readLedger 返回已应用记录', async () => {
+    const sqlite = new DatabaseSync(':memory:')
+    const db = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
+    await applyMigrations(db, [entry('SELECT 1;', 1, 'a'), entry('SELECT 2;', 2, 'a')])
+    expect(await readLedger(db)).toEqual([
+      { pluginId: 'a', n: 1, name: 'n1' },
+      { pluginId: 'a', n: 2, name: 'n2' },
+    ])
+    await db.destroy()
+  })
+
+  it('rollbackMigrations 逆序执行 down 并清 ledger', async () => {
+    const sqlite = new DatabaseSync(':memory:')
+    const db = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
+
+    const entries: MigrationEntry[] = [
+      {
+        pluginId: 'p',
+        n: 1,
+        name: 'create',
+        up: 'CREATE TABLE t (id TEXT NOT NULL PRIMARY KEY);',
+        down: 'DROP TABLE t;',
+      },
+      {
+        pluginId: 'p',
+        n: 2,
+        name: 'add-column',
+        up: "INSERT INTO t VALUES ('keep');",
+        down: 'SELECT 1;',
+      },
+    ]
+    await applyMigrations(db, entries)
+    expect(await readLedger(db)).toHaveLength(2)
+
+    const undone = await rollbackMigrations(db, entries)
+    expect(undone).toEqual([
+      { pluginId: 'p', n: 2, name: 'add-column' },
+      { pluginId: 'p', n: 1, name: 'create' },
+    ])
+    expect(await readLedger(db)).toEqual([])
+    const tables = sqlite
+      .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 't'")
+      .all()
+    expect(tables).toEqual([])
+    await db.destroy()
+  })
+
+  it('rollbackMigrations 跳过未落账条目', async () => {
+    const sqlite = new DatabaseSync(':memory:')
+    const db = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
+    const entries = [entry('u1', 1, 'p')]
+    expect(await rollbackMigrations(db, entries)).toEqual([])
+    await db.destroy()
   })
 })

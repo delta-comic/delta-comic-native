@@ -55,6 +55,11 @@ export const PluginManifestSchema = Type.Object({
     { additionalProperties: false },
   ),
   capabilities: Type.Array(Type.String(), { description: '能力依赖声明（宽松集）' }),
+  dependencies: Type.Optional(
+    Type.Array(Type.String({ pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$' }), {
+      description: '依赖的插件 id 列表（宿主构建依赖图与 migration 排序）',
+    }),
+  ),
 })
 
 export type PluginManifest = Static<typeof PluginManifestSchema>

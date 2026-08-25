@@ -79,4 +79,15 @@ describe('manifest 校验', () => {
     ;(manifest.network as Record<string, unknown>).multiEdge = 'yes'
     expect(issuePaths(manifest).some(path => path.includes('multiEdge'))).toBe(true)
   })
+
+  it('dependencies 可选且元素必须是 kebab-case 插件 id', () => {
+    const withDeps = { ...baseManifest(), dependencies: ['reader', 'share-core'] }
+    expect(validateManifest(withDeps).ok).toBe(true)
+
+    const badId = { ...baseManifest(), dependencies: ['Reader'] }
+    expect(issuePaths(badId).some(path => path.includes('dependencies'))).toBe(true)
+
+    const badType = { ...baseManifest(), dependencies: ['ok', 1] }
+    expect(issuePaths(badType).some(path => path.includes('dependencies'))).toBe(true)
+  })
 })
