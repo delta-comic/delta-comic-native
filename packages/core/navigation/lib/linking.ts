@@ -17,7 +17,7 @@ export interface LinkingConfigInput {
 }
 
 export interface LinkingConfig {
-  readonly prefixes: readonly string[]
+  readonly prefixes: string[]
   readonly config: {
     readonly screens: Readonly<Record<string, unknown>>
   }

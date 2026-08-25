@@ -6,18 +6,19 @@
  * - 两者均为 Service Definition：注册即 effect，ctx.routeRegistry/ctx.navigation 注入
  */
 import { Service, type Context, type Disposable } from 'cordis'
+import type { ReactNode } from 'react'
 import { valid } from 'semver'
 
 import { buildRouteKey, isRouteKey, type RouteKey, type Routes } from './keys'
 
-/** 屏幕组件契约：接收与 Routes 声明一致的参数（React 类型不进 core）。 */
+/** 屏幕组件契约：接收与 Routes 声明一致的参数（仅类型层依赖 react）。 */
 export interface RouteScreenProps<P> {
   readonly params: P
 }
 
 export type RouteScreen<K extends keyof Routes = keyof Routes> = (
   props: RouteScreenProps<Routes[K]>,
-) => unknown
+) => ReactNode
 
 export interface RouteRegistration<K extends keyof Routes = keyof Routes> {
   /** 来源插件 ID，构成 key 的前缀段。 */
