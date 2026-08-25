@@ -37,6 +37,9 @@ catalog:
   '@react-navigation/bottom-tabs': ^7.4.0
   ky: ^2.0.2
   vitest: ^4.1.11
+  '@modelcontextprotocol/server': ^2.0.0
+  ws: ^8.18.0
+  '@types/ws': ^8.18.1
 minimumReleaseAgeExclude:
   - '@voidzero-dev/vite-plus-core@0.3.0'
   - '@voidzero-dev/vite-plus-darwin-arm64@0.3.0'

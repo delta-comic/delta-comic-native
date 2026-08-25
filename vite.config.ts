@@ -50,6 +50,13 @@ export default defineConfig({
           include: ['packages/*/*/test/**/*.test.ts'],
         },
       },
+      {
+        test: {
+          name: 'scripts',
+          environment: 'node',
+          include: ['scripts/*/script/test/**/*.test.ts'],
+        },
+      },
     ],
   },
 })
