@@ -18,6 +18,7 @@
     "typebox": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
