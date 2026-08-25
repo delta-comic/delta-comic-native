@@ -8,6 +8,7 @@
 - **New Architecture 基础保留**：Fabric、TurboModules、JSI、Codegen 为基础能力。
 - **Cordis 为贯穿整个应用的元框架**：Service/Events/effect/loader 构成应用运行时基座——服务发现、依赖注入、生命周期、事件总线、配置与热更新全部由 Cordis 承担；UIRegistry、数据 Repository、scheduler、NavigationService、capability 等所有跨插件协议均以 Cordis service/event 形态表达，宿主与动态插件共享同一套上下文模型。
 - **all-in-plugin**：`packages/*/*` 下每个子 repo 都是一个独立 Cordis plugin；应用入口极薄，只负责挂载 Cordis root 与启动 loader。插件支持远程动态加载 JS 与资源；无沙箱模型，用户安装即同意其拥有宿主扩展权限；动态插件不可新增原生二进制，原生能力全部由宿主或官方 capability plugin 预注册。
+- **scripts 同为 monorepo 成员**：workspace 覆盖 `scripts/*`，每个子目录是一个独立脚本包；该目录集中存放各类脚本程序（构建辅助、发布流程、开发工具等），属于宿主工程侧的工具集合。
 - **插件市场为外部项目**：负责认证、作者身份、签名审核、目录、分发、安装/更新/卸载/回滚/状态同步。客户端只定义并消费 Market Adapter 协议：`catalog / install / update / uninstall / rollback / status`。权限决策归市场，客户端提供 capability 门控、审计日志、错误反馈协议。
 - **插件包**：`plugin.zip` = `manifest.json` + 入口 + chunks + assets + types + sourcemaps。入口采用 common + platform override：任意 plugin 可声明 `common/web/android/macos/windows` 入口，manifest 显式声明平台、入口、fallback、能力依赖。
 - **执行策略 "3+2"**：Hermes 端（android/macos/windows）优先 bytecode `.hbc`，Web 使用 ESM；协议、manifest、Host API、Cordis lifecycle 三端一致。原生 `plugin-loader` capability 封装 Hermes/JSI 细节（bytecode 校验、加载、模块注册），协议不暴露 Hermes C++/JSI。manifest 记录 platform、runtime、Hermes bytecode version、React Native/Hermes version range、CPU 架构、编译选项摘要、sha256、fallback。
