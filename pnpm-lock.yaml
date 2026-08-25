@@ -304,6 +304,28 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  packages/ui/recovery:
+    dependencies:
+      '@delta-comic/loader':
+        specifier: workspace:*
+        version: link:../../core/loader
+      uniwind:
+        specifier: 'catalog:'
+        version: 1.11.0(metro-cache@0.87.0(supports-color@10.2.2))(metro-transform-worker@0.87.0(supports-color@10.2.2))(metro@0.87.0(supports-color@10.2.2))(react-native@0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)(tailwindcss@4.3.3)
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-native:
+        specifier: 'catalog:'
+        version: 0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
   packages/ui/theme:
     dependencies:
       uniwind:
