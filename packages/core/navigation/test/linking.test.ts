@@ -16,6 +16,18 @@ describe('buildLinkingConfig', () => {
     })
   })
 
+  it('tab 路由嵌套在 tabs 分组下，push 路由保持平铺', () => {
+    const config = buildLinkingConfig({
+      prefixes: [],
+      routes: [buildRouteKey('core', 'home'), buildRouteKey('core', 'search')],
+      tabRoutes: [buildRouteKey('core', 'home')],
+    })
+    expect(config.config.screens).toEqual({
+      tabs: { screens: { 'core/home': 'core/home' } },
+      'core/search': 'core/search',
+    })
+  })
+
   it('空路由集合产出空 screens', () => {
     const config = buildLinkingConfig({ prefixes: [], routes: [] })
     expect(config.config.screens).toEqual({})
