@@ -116,3 +116,23 @@ Phase 5 启动链路：loader plugin 发现/校验/依赖图/migration 排序/Co
 
 ### 验证
 vp install（+17 包）/ vp lint / vp run -r typecheck（14 任务）/ vp test（42 passed）全部通过。
+
+## Session 2026-08-25（Phase 5 启动链路）
+
+### 落地
+- db 3719004：topoSortIds 泛化 Kahn 拓扑 + readLedger + rollbackMigrations（down 对称回滚、未落账跳过）。
+- db 37bb443：core-tables.ts `plugin_state(id,state,stage,error,payload_json,updated_at)` DSL + coreMigrations；DatabaseOf 放宽 AnyTableDef 规避泛型不变性。
+- loader 05d4e8e：state.ts 状态机 disabled/unavailable+PERSISTED_STATES；source.ts DiscoveredPlugin{manifest,resolveEntry,migrations}+PluginSource{official|user}；service.ts PluginLoaderService 全启动管线（core migration→discover→verify 失败 disabled→缺依赖 unavailable→成环全体 disabled→拓扑序两阶段 migrate+activate）+retry 链式恢复+uninstall+plugin_state 持久化（重启恢复）+Events 'loader/plugin-state'/'loader/rolled-back' emit。
+- loader 37901c2+7a24098：update(id,candidate) freshMigrations 增量回滚；rollbackOrPark——down 成功 emit rolled-back 重启旧版，down 也失败 adoptCandidate 入人工恢复态（disabled stage='rollback' 持久化）。
+- ui c9586a4：ui-recovery 包 RecoveryScreen（records+onRetry/onUninstall/onExportDiagnostics，RN 组件+className Uniwind 样式）。
+
+### 关键事实
+- node:sqlite prepare('')/(';') 抛 statement finalized——raw SQL 前用 /[^\s;]/ 判空跳过执行仍删 ledger 行。
+- tsdown dts 默认 externalize dependencies，devDeps 类型会被内联打包撞内部导出——运行时依赖必须进 dependencies。
+- JSX 必须 .tsx；uniwind/types 子路径提供 RN 组件 className 增强；oxlint unbound-method 要求 props 回调写成箭头函数属性签名。
+- manifest 最小合法必含 runtime.compileOptions:{dev:'false'}。
+- vitest toMatchObject 中 failure:undefined 会失配——分开断言 toBeUndefined()。
+- vp run typecheck --filter 会透传 filter 给 tsc OOM；单包验证用包内 npx tsc --noEmit。
+
+### 下一步
+Phase 6 Shell 与导航。

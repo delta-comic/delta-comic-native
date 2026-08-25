@@ -34,7 +34,7 @@
 - 雪花 ID 服务（TEXT 十进制存储）
 
 ### Phase 5: 启动链路
-**Status:** pending
+**Status:** complete（commit 见 progress.md）
 - loader plugin：发现/校验/依赖图/migration 排序/Cordis activation
 - 插件状态机 discovered->...->active，失败 disabled/unavailable，更新回滚流程
 - 恢复界面（错误详情/导出诊断/卸载）
@@ -95,4 +95,4 @@
 |-------|---------|------------|
 
 ## Next Step
-Phase 5：启动链路（loader plugin 发现/校验/依赖图/migration 排序/Cordis activation、插件状态机、恢复界面）。
+Phase 6：Shell 与导航（AppShell 六区组件 + BottomNavigation 五 tab；RouteRegistry + NavigationService + 深链 resolver + Web URL 同步）。
