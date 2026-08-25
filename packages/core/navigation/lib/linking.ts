@@ -14,7 +14,9 @@ export interface LinkingConfigInput {
   readonly tabRoutes?: Iterable<string>
 }
 
-export type LinkingScreensEntry = string | { readonly screens: Record<string, string> }
+export type LinkingScreensEntry =
+  | string
+  | { readonly path?: string; readonly screens: Record<string, string> }
 
 export interface LinkingConfig {
   readonly prefixes: string[]
