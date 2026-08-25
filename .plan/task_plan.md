@@ -21,8 +21,8 @@
 
 ### Phase 3: 核心协议包
 **Status:** pending
-- manifest TypeBox schema + runtime 校验
-- plugin contract 公开 interface（player 输入协议 module augmentation 挂点）
+- manifest TypeBox schema + runtime 校验（含 `network.multiEdge` 能力开关）
+- plugin contract 公开 interface（player 输入协议 module augmentation 挂点、`resolveEdges(ctx): Promise<Edge[]>` hook 契约）
 - UIRegistryService 类型化 get<K> + module augmentation 基线
 
 ### Phase 4: 数据层基础设施
@@ -60,7 +60,7 @@
 
 ### Phase 10: 平台服务
 **Status:** pending
-- network(ky)/scheduler(@cordisjs/plugin-timer 原语)/storage 治理/capability 门控/审计日志
+- network(ky)/EdgeRouter(竞速探测/plugin_endpoint 持久化/ensureSelected 兜底/withFailover)/scheduler(@cordisjs/plugin-timer 原语)/storage 治理/capability 门控/审计日志
 - 可观测性文件导出插件 + 崩溃捕获 + 诊断导出
 
 ### Phase 11: 构建库

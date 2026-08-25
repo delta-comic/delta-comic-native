@@ -103,7 +103,26 @@ Native Host -> minimal loader plugin -> db open + core migration
 
 ## 8. 网络与后台任务
 
+### 8.1 基础网络
+
 - 插件直用全局 fetch；核心可选 network 服务=ky 封装（超时/指数退避重试/按源限速）；图片统一 expo-image；大文件归 resource/download 断点续传。
+
+### 8.2 EdgeRouter（多端点分流）
+
+定位：opt-in 协作服务。插件拥有"发现什么"和"怎么请求"，宿主拥有"哪个最快"和"坏了怎么办"；抽象止步于 URL 前缀，请求自由度（ky/裸 fetch/WebSocket/私有 RPC/自签名）不受约束。
+
+- 声明：manifest 仅含能力开关 `network.multiEdge`；端点候选由插件 hook `resolveEdges(ctx): Promise<Edge[]>` 运行时产出——动态拉取、解密、硬编码均插件自主，manifest 静态清单无法覆盖的动态端点场景由此承接。
+- 统一探测：宿主对候选并发发轻量 GET（3~5s 超时），`Promise.any` 首个成功者即为 selected，其余跑完记录 latency 形成排序表（HEAD 兼容性差弃用）。
+- 状态机（每插件一份）：`unprobed -> probing -> ready(selected) / failed(全灭)`；ready 下请求失败 fail_count++ 并切换 latency 次优候选重试一次；failed 进入退避 30s→2m→5m 自动重探。
+- 持久化：core 表 `plugin_endpoint(plugin_id, url, latency_ms, last_ok_at, fail_count)`；冷启动 last_ok_at 在 TTL（6h）内直接复用选中免探。
+- 时序保证：`ensureSelected(timeout≈8s)` 同步兜底——ready 直接返回缓存选中、unprobed 当场竞速定案、failed 抛结构化错误 `no-edge-available` 交 UI 展示重试入口；loader 激活完成后 idle 预热（`@cordisjs/plugin-timer`）为优化路径。
+- 插件 API 面：`ctx.edge.current`（同步读）/ `await ensureSelected(timeout)` / `resolve(path)` 补全 base / `report(url, ok)` 自行反馈健康度 / `withFailover(fn)`（回调抛错→标记→切次优→重调，重试控制流留在插件回调内，header/签名由插件自行重放）。
+- 资源 URL 入库形态插件自决；最佳实践=存相对 path、渲染时 `resolve()` 补全当前 edge base，换 edge 零迁移成本。edge 切换以 Cordis Events 广播 `edge-changed`，内存态由响应式层刷新。
+- HMR/更新：EndpointState 存宿主 db（keyed by pluginId），`reloadPlugin` 后 resolveEdges 结果 TTL 内复用；multiEdge 开关或插件版本变化触发重探。
+- Web 端候选端点须配置 CORS（写入插件开发文档）；RN 无此约束。
+
+### 8.3 scheduler
+
 - scheduler 服务（首期最小版）：桌面=进程内优先级队列+并发上限+持久任务状态；Android 仅应用存活期运行、退后台暂停、重开续传（前台服务/WorkManager 后置）；Web 会话级续传。底层原语用 `@cordisjs/plugin-timer`（ctx.timeout/interval/throttle/debounce 随 fiber 清理）。resource/download 为最大消费者；插件可注册周期任务。
 
 ## 9. 缓存与存储治理

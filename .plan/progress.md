@@ -34,3 +34,15 @@ vp install / vp lint / vp run -r typecheck（7 包全绿）/ vp test（2 passed�
 
 ### 下一步
 Phase 3 核心协议包：manifest TypeBox schema + 运行时校验、plugin contract 公开 interface（player 输入协议挂点）、UIRegistryService 类型化 get<K> + module augmentation 基线。
+
+## Session 2026-08-25（EdgeRouter 分流设计）
+
+### 裁决
+- 多端点分流方案定稿并落盘 docs/architecture.md §8.2：
+  - 端点候选由插件 hook `resolveEdges(ctx): Promise<Edge[]>` 运行时产出（动态发现/解密/硬编码插件自主），manifest 仅含 `network.multiEdge` 能力开关——用户裁决：manifest 静态声明端点不可行，动态端点场景必须承接。
+  - 请求自由度不动摇（fetch/ky/WebSocket/私有 RPC 均可），EdgeRouter 为 opt-in 协作服务：current / ensureSelected(8s) / resolve(path) / report(url,ok) / withFailover(fn) 五 API——用户裁决：强制相对路径网络抽象会限制生态多样化。
+  - 统一代理测试收窄为探测与选路：并发轻量 GET 竞速 + latency 排序 + plugin_endpoint 表持久化 + 退避重探 + edge-changed 广播。
+  - 资源 URL 入库形态插件自决，最佳实践=存 path 渲染时 resolve()；HMR 场景 EndpointState 在宿主 db，reloadPlugin 后 TTL 内复用。
+
+### 归属
+- 协议契约（multiEdge 开关 + resolveEdges 契约 + Edge 类型）进 Phase 3；EdgeRouter 服务实现进 Phase 10。
