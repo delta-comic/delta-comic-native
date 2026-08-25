@@ -96,3 +96,23 @@ Phase 5 启动链路：loader plugin 发现/校验/依赖图/migration 排序/Co
 
 ### 归属
 - 新 Phase 7「AI 调试通道（Dev MCP）」插入 Shell/导航之后——此时状态机+导航已就绪，后续 Feed/Player/业务插件阶段即可被 AI 自主调试辅助；旧 7~12 顺延为 8~13；构建库（新 12）负责 dev-mcp 接入 vp dev 工作流与生产零包含验证。
+
+## Session 2026-08-25（样式方案切换 NativeWind → Uniwind）
+
+### 裁决
+- 放弃 NativeWind，class→style 方案切换为 Uniwind ^1.11.0（react-native-unistyles 原班作者）。
+- 决定性依据：
+  - NativeWind v5 官方安装文档仅存 Expo 路径（bare RN 章节仅 v4 有），本项目为裸 RN 四端宿主工程（Android/macOS/Windows/Web），平台支持错位是实质风险；Uniwind 明确支持 bare RN + monorepo + iOS/Android/tvOS/Web/macOS/Windows。
+  - Uniwind 为 Tailwind v4-only、CSS-first `@theme`：现有 theme.css（--dc-* token + @theme inline）直接兼容复用。
+  - Metro 插件单点实现、无 babel preset，构建链简单，利好 Hermes bytecode "3+2" 流水线。
+  - 拥有官方 AI skills（uniwind / migrate-nativewind-to-uniwind），Agent 协作支持好。
+- 已知代价：库龄约 1 年生态较薄；厂商基准（2~3x 快于 NativeWind）未经实测；Web 端 className 不自动去重需配 tailwind-merge cn 工具；默认 rem=16px（metro polyfills 可配 14）。
+
+### 落地
+- catalog 移除 nativewind 5.0.0-preview.4 + react-native-css ^3.0.1，新增 uniwind ^1.11.0（peer: react>=19/rn>=0.81/tailwindcss>=4 全满足）；@delta-comic/ui-theme 增加真实依赖 `uniwind: catalog:`。
+- cspell 词表补 uniwind；theme.css 未动（token 文件形态不变，app 入口 css 在 Phase 6+ 接 `@import 'uniwind'`）。
+- 安装全局 skills：typescript-mcp-server-generator（github/awesome-copilot）、react-navigation 与 create-react-native-library（callstackincubator）、uniwind + migrate-nativewind-to-uniwind（uni-stack 官方）。
+- MCP SDK 情报更新：官方 v2 拆包已成推荐线（@modelcontextprotocol/server|node|core，v1 单包退役），Phase 7 以 v2 为准。
+
+### 验证
+vp install（+17 包）/ vp lint / vp run -r typecheck（14 任务）/ vp test（42 passed）全部通过。
