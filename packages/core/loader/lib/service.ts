@@ -8,9 +8,12 @@
 import {
   applyMigrations,
   coreMigrations,
+  readLedger,
+  rollbackMigrations,
   topoSortIds,
   type AppliedMigration,
   type CoreDatabase,
+  type MigrationEntry,
   type MigrationLedgerDatabase,
 } from '@delta-comic/db'
 import { validateManifest } from '@delta-comic/protocol'
@@ -83,6 +86,26 @@ export class PluginLoaderService extends Service {
     for (const slot of order) {
       if (slot.state === 'migrated') await this.activate(slot)
     }
+  }
+
+  /** 更新插件：校验 → 增量迁移 → 换装 fiber；失败回滚本次迁移并重启旧版。 */
+  async update(id: string, candidate: DiscoveredPlugin): Promise<void> {
+    const db = this.requireDb()
+    const slot = this.slots.get(id)
+    if (slot === undefined) throw new Error(`插件不存在：${id}`)
+    const result = validateManifest(candidate.manifest)
+    if (!result.ok) {
+      throw new Error(result.issues.map(issue => `${issue.path}: ${issue.message}`).join('; '))
+    }
+    const before = new Set((await readLedger(db)).map(row => `${row.pluginId}/${row.n}`))
+    const fresh = freshMigrations(candidate.migrations, before)
+    try {
+      await applyMigrations(db, candidate.migrations)
+    } catch (error) {
+      await this.rollbackOrPark(slot, db, candidate, fresh, error)
+      throw error
+    }
+    await this.swapFiber(slot, db, candidate, fresh)
   }
 
   /** 重走单个插件的迁移与激活；成功后自动重走因它而 unavailable 的依赖方。 */
@@ -347,10 +370,98 @@ export class PluginLoaderService extends Service {
     await this.persist(slot)
     return true
   }
+
+  /** 回滚本次更新迁移；回滚也失败则进入人工恢复态（disabled/rollback 持久化）。 */
+  private async rollbackOrPark(
+    slot: PluginSlot,
+    db: Kysely<LoaderDatabase>,
+    candidate: DiscoveredPlugin,
+    fresh: readonly MigrationEntry[],
+    cause: unknown,
+  ): Promise<boolean> {
+    const reason = errorMessage(cause)
+    let undone: readonly AppliedMigration[] = []
+    try {
+      undone = await rollbackMigrations(db, fresh)
+    } catch (rollbackError) {
+      const fiber = slot.fiber
+      if (fiber !== undefined) await fiber.dispose()
+      slot.fiber = undefined
+      this.adoptCandidate(slot, candidate)
+      this.setFailure(
+        slot,
+        'disabled',
+        'rollback',
+        `${reason}；回滚失败：${errorMessage(rollbackError)}`,
+      )
+      await this.persist(slot)
+      return false
+    }
+    this.ctx.emit('loader/rolled-back', { id: slot.id, reason, undone })
+    return true
+  }
+
+  /** 槽位切换为候选版本（人工恢复态下已安装包即新版本）。 */
+  private adoptCandidate(slot: PluginSlot, candidate: DiscoveredPlugin): void {
+    slot.discovered = candidate
+    slot.version =
+      typeof candidate.manifest.version === 'string' ? candidate.manifest.version : slot.version
+    slot.dependencies = Array.isArray(candidate.manifest.dependencies)
+      ? [...candidate.manifest.dependencies]
+      : []
+  }
+
+  /** 换装 fiber：停旧 → 启新；激活失败回滚后重启旧版。 */
+  private async swapFiber(
+    slot: PluginSlot,
+    db: Kysely<LoaderDatabase>,
+    candidate: DiscoveredPlugin,
+    fresh: readonly MigrationEntry[],
+  ): Promise<void> {
+    const previousDiscovered = slot.discovered
+    if (slot.fiber !== undefined) await slot.fiber.dispose()
+    slot.fiber = undefined
+    this.advance(slot, 'activating')
+    try {
+      const entry = await candidate.resolveEntry()
+      slot.fiber = await this.ctx.plugin(entry)
+    } catch (error) {
+      const rolledBack = await this.rollbackOrPark(slot, db, candidate, fresh, error)
+      if (!rolledBack) return
+      if (previousDiscovered === undefined) {
+        this.setFailure(slot, 'disabled', 'activate', errorMessage(error))
+        await this.persist(slot)
+        return
+      }
+      try {
+        const oldEntry = await previousDiscovered.resolveEntry()
+        slot.fiber = await this.ctx.plugin(oldEntry)
+      } catch (restartError) {
+        this.setFailure(slot, 'disabled', 'activate', `旧版重启失败：${errorMessage(restartError)}`)
+        await this.persist(slot)
+        return
+      }
+      this.advance(slot, 'active')
+      await this.persist(slot)
+      return
+    }
+    this.adoptCandidate(slot, candidate)
+    slot.migrated = true
+    this.advance(slot, 'active')
+    await this.persist(slot)
+  }
 }
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
+}
+
+/** 本次更新新落账的迁移（此前已在 ledger 的历史迁移保持不动）。 */
+function freshMigrations(
+  migrations: readonly MigrationEntry[],
+  before: ReadonlySet<string>,
+): MigrationEntry[] {
+  return migrations.filter(entry => !before.has(`${entry.pluginId}/${entry.n}`))
 }
 
 function parseFailure(raw: string | null): PluginFailure | undefined {

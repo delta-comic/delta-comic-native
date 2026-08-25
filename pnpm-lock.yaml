@@ -216,13 +216,19 @@ importers:
       cordis:
         specifier: 'catalog:'
         version: 4.0.0-rc.8
+      kysely:
+        specifier: 'catalog:'
+        version: 0.29.5
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
         specifier: 'catalog:'
-        version: 4.1.11(@types/node@26.1.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
 
   packages/core/protocol:
     dependencies:
@@ -1370,13 +1376,6 @@ packages:
     resolution: {integrity: sha512-4ec2Z/LOmRsAgU23CS4xeJfcJlmRg94A/XrbGRCF1gyU/zdDfRLYDVsS+ynSZCmGNxQ1jQriQOKMQeQxBA3Isw==}
     engines: {node: '>=14.0.0'}
     cpu: [wasm32]
-    bundledDependencies:
-      - '@napi-rs/wasm-runtime'
-      - '@emnapi/core'
-      - '@emnapi/runtime'
-      - '@tybys/wasm-util'
-      - '@emnapi/wasi-threads'
-      - tslib
 
   '@tailwindcss/oxide-win32-arm64-msvc@4.3.2':
     resolution: {integrity: sha512-Zyr/M0+XcYZu3bZrUytc7TXvrk0ftWfl8gN2MwekNDzhqhKRUucMPSeOzM0o0wH5AWOU49BsKRrfKxI2atCPMQ==}
