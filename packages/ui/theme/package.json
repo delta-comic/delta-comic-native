@@ -4,10 +4,14 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "exports": {
-    ".": "./lib/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./lib/index.ts"
+    },
     "./theme.css": "./lib/theme.css"
   },
   "scripts": {
+    "pack": "vp pack",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

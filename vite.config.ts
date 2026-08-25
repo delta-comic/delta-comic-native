@@ -22,7 +22,10 @@ export default defineConfig({
   },
   run: {
     cache: { tasks: true, scripts: false },
-    tasks: { typecheck: { command: 'vp run -r typecheck', output: [] } },
+    tasks: {
+      pack: { command: 'vp run -r pack', output: ['packages/*/*/dist/**'] },
+      typecheck: { dependsOn: ['pack'], command: 'vp run -r typecheck', output: [] },
+    },
   },
   test: {
     clearMocks: true,
