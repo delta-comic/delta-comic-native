@@ -1,11 +1,8 @@
-import type { Context } from 'cordis'
-
 /**
- * Delta Comic 注册中心插件。
+ * Delta Comic UI 注册表包。
  *
  * 职责（Phase 3 实现）：
- * - UIRegistryService：类型化 get<K extends keyof UIRegistry>(key: K)
- * - RouteRegistry + module augmentation 基线
- * - 覆盖声明（目标 key / 兼容版本 / 优先级）的运行时校验
+ * - UIRegistryService：类型化 get<K>、注册/覆盖声明校验
+ * - module augmentation 基线见 @delta-comic/protocol 的 UIRegistry
  */
-export function apply(_ctx: Context): void {}
+export { UIRegistryService } from './service'

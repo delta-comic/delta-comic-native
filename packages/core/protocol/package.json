@@ -10,10 +10,11 @@
     }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "pack": "vp pack"
+    "pack": "vp pack",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "cordis": "catalog:",
     "semver": "catalog:",
     "typebox": "catalog:"
   },

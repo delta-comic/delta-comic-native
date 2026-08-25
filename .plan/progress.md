@@ -46,3 +46,25 @@ Phase 3 核心协议包：manifest TypeBox schema + 运行时校验、plugin con
 
 ### 归属
 - 协议契约（multiEdge 开关 + resolveEdges 契约 + Edge 类型）进 Phase 3；EdgeRouter 服务实现进 Phase 10。
+
+## Session 2026-08-25（Phase 3 核心协议包 + pack 基建）
+
+### 依赖与基建
+- catalog 切换 `typebox ^1.3.18`（@sinclair/typebox 已弃用），补 `@types/semver`；commit 6ddc3c8。
+- 七个 workspace 包全部配置 vite-plus pack（各包 vite.config.ts `pack` block：entry lib/index.ts、esm、dts、platform neutral、target esnext、sourcemap、treeshake、clean；theme 额外 copy theme.css）。platform node 会产出 .mjs/.d.mts，neutral 统一 .js/.d.ts，exports 加 `"types": "./dist/index.d.ts"` 条件（运行时仍走源码），typecheck 消费声明产物降低重查成本。根 run.tasks 接线 pack 任务且 typecheck dependsOn pack。commit 943a6be。
+
+### Phase 3 落地
+- protocol/lib/manifest.ts：PluginManifestSchema（id 单段 kebab pattern、version semver pattern、hostVersion range、entries common 必填+web/android/macos/windows 可选+additionalProperties:false、fallback、runtime{rn/hermes range,bytecode,cpu[],compileOptions}、network.multiEdge 开关、capabilities 宽松集）；validateManifest 返回判别联合 {ok:true,manifest}|{ok:false,issues[]}，Value.Check 失败后 Value.Errors 映射 instancePath/message，再以 semver.validRange 深查三个 range 字段。
+- protocol/lib/contract.ts：PlayerInputRegistry module augmentation 挂点 + PlayerInputDefinition{schema,version} + PlayerInput<K> Static 推导 + PlayerInstance + PlayerResolveResult<K>（instance|redirect(key,input)）；Edge{baseUrl,label?} + ResolveEdgesHook=(ctx)=>Promise<Edge[]>；declare module cordis Events 'protocol/edge-changed' @mode emit。
+- protocol/lib/ui.ts：UIRegistry augmentation 挂点、isValidUiKey 分层 key 校验（layer/name 两段起）、UIBaseRegistration/UIOverrideRegistration{id,version,component,priority?,override:{targetId,compatibleVersion}}。
+- registry/lib/service.ts：UIRegistryService extends Service（ctx.uiRegistry 合并）；get<K> 取优先级最高组件（唯一 as 还原点，不变式由 register<K> 签名保证）；register 校验分层 key/semver/重复 ID，override 强制目标存在+compatibleVersion satisfies 目标版本+priority 高于目标；返回注销 disposer。
+- 测试 22 passed：manifest 7 用例（含 issue path 断言）、contract augment 类型断言（Expect<> 编译期验证 PlayerInputRegistry/UIRegistry 扩展生效）、registry service 10 用例（Reflect.apply 绕过类型保护 JS 调用方路径）。
+- loader 骨架测试改引 UIRegistryService。
+
+### 关键事实
+- typebox v1：Value.Check 是 `value is Static<T>` 类型守卫；错误对象含 keyword/schemaPath/instancePath/params/message（message 必有，无 path 字段）。
+- vitest 规则 no-conditional-expect 生效：条件分支用 toMatchObject 替代 if(expect)。
+- noUnusedLocals 对 `_` 前缀 type alias 不豁免，编译期断言需 export。
+
+### 下一步
+Phase 4 数据层基础设施：TypeBox 表 DSL -> snapshot -> diff -> up/down .sql 编译器、Static 推导 Kysely Database 类型、migration registry。

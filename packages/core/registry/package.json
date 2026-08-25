@@ -14,9 +14,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "cordis": "catalog:"
+    "@delta-comic/protocol": "workspace:*",
+    "cordis": "catalog:",
+    "semver": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "@types/semver": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

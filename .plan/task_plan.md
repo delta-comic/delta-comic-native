@@ -20,7 +20,7 @@
 - workspace catalog 补充核心依赖（cordis、kysely、@sinclair/typebox、react-navigation 等）
 
 ### Phase 3: 核心协议包
-**Status:** pending
+**Status:** complete（commit 见 progress.md）
 - manifest TypeBox schema + runtime 校验（含 `network.multiEdge` 能力开关）
 - plugin contract 公开 interface（player 输入协议 module augmentation 挂点、`resolveEdges(ctx): Promise<Edge[]>` hook 契约）
 - UIRegistryService 类型化 get<K> + module augmentation 基线
