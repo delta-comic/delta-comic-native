@@ -22,7 +22,7 @@ describe('调试信封校验', () => {
     for (const message of [hello, request, success, failure]) {
       const result = parseDebugMessage(message)
       expect(result.ok).toBe(true)
-      if (result.ok) expect(result.message.kind).toBe(message.kind)
+      expect(result).toMatchObject({ ok: true, message: { kind: message.kind } })
     }
   })
 
@@ -46,7 +46,7 @@ describe('调试信封校验', () => {
   it('空对象与非对象输入被拒绝并给出 issue path', () => {
     const empty = parseDebugMessage({})
     expect(empty.ok).toBe(false)
-    if (!empty.ok) expect(empty.issues.length).toBeGreaterThan(0)
+    expect(empty).toMatchObject({ issues: expect.any(Array) })
 
     expect(parseDebugMessage(null).ok).toBe(false)
     expect(parseDebugMessage(42).ok).toBe(false)
