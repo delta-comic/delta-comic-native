@@ -10,9 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sinclair/typebox": "catalog:"
+    "semver": "catalog:",
+    "typebox": "catalog:"
   },
   "devDependencies": {
+    "@types/semver": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

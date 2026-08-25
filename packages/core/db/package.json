@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sinclair/typebox": "catalog:",
-    "kysely": "catalog:"
+    "kysely": "catalog:",
+    "typebox": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:"
