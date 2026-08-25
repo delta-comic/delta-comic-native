@@ -107,16 +107,16 @@ function createIndexSql(
 
 function columnSql(
   name: string,
-  def: { affinity: string; notNull: boolean; default?: unknown },
+  def: { affinity: string; notNull: boolean; default?: string | number | boolean | null },
 ): string {
   const parts = [q(name), def.affinity]
-  if (def.notNull && 'default' in def) parts.push('NOT NULL', `DEFAULT ${literal(def.default)}`)
-  else if (def.notNull) parts.push('NOT NULL')
-  else if ('default' in def) parts.push(`DEFAULT ${literal(def.default)}`)
+  const fallback = def.default
+  if (fallback !== undefined) parts.push(`DEFAULT ${literal(fallback)}`)
+  if (def.notNull) parts.push('NOT NULL')
   return parts.join(' ')
 }
 
-function literal(value: unknown): string {
+function literal(value: string | number | boolean | null): string {
   if (value === null) return 'NULL'
   if (typeof value === 'boolean') return value ? '1' : '0'
   if (typeof value === 'number') return String(value)

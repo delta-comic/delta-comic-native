@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { Kysely } from 'kysely'
 import { describe, expect, it } from 'vitest'
 
-import { nodeSqliteDialect } from '../lib/driver'
+import { nodeSqliteDialectFrom } from '../lib/driver'
 import { defineTable, text, textNotNull } from '../lib/dsl'
 import {
   applyMigrations,
@@ -39,8 +39,8 @@ function entry(up: string, n = 1, pluginId = 'core'): MigrationEntry {
 describe('node:sqlite driver 与迁移往返', () => {
   it('编译产物建表、插入并回查', async () => {
     const sqlite = new DatabaseSync(':memory:')
-    const ledgerDb = new Kysely({ dialect: nodeSqliteDialect(sqlite) })
-    const dataDb = new Kysely<DataDatabase>({ dialect: nodeSqliteDialect(sqlite) })
+    const ledgerDb = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
+    const dataDb = new Kysely<DataDatabase>({ dialect: nodeSqliteDialectFrom(sqlite) })
 
     const migration = compileMigration(null, snapshotOf(comicV1))
     const applied = await applyMigrations(ledgerDb, [entry(migration.up.join(';\n') + ';')])
@@ -55,7 +55,7 @@ describe('node:sqlite driver 与迁移往返', () => {
 
   it('ledger 幂等：重复调用不再应用', async () => {
     const sqlite = new DatabaseSync(':memory:')
-    const db = new Kysely({ dialect: nodeSqliteDialect(sqlite) })
+    const db = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
     const migration = compileMigration(null, snapshotOf(comicV1))
     expect(await applyMigrations(db, [entry(migration.up.join(';\n') + ';')])).toHaveLength(1)
     expect(await applyMigrations(db, [entry(migration.up.join(';\n') + ';')])).toEqual([])
