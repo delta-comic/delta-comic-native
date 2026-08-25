@@ -1,0 +1,94 @@
+import { DatabaseSync } from 'node:sqlite'
+
+import { Kysely } from 'kysely'
+import { describe, expect, it } from 'vitest'
+
+import { nodeSqliteDialect } from '../lib/driver'
+import { defineTable, text, textNotNull } from '../lib/dsl'
+import {
+  applyMigrations,
+  assertUniqueMigrations,
+  sortMigrations,
+  type MigrationEntry,
+} from '../lib/migrator'
+import { snapshotOf } from '../lib/snapshot'
+import { compileMigration } from '../lib/sql'
+
+const comicV1 = [
+  defineTable('comic', {
+    columns: { id: textNotNull(), title: textNotNull(), author: text() },
+    primaryKey: ['id'],
+    indexes: [{ columns: ['title'] }],
+  }),
+]
+
+interface ComicRow {
+  id: string
+  title: string
+  author: string | null
+}
+
+interface DataDatabase {
+  comic: ComicRow
+}
+
+function entry(up: string, n = 1, pluginId = 'core'): MigrationEntry {
+  return { pluginId, n, name: `n${n}`, up, down: '' }
+}
+
+describe('node:sqlite driver 与迁移往返', () => {
+  it('编译产物建表、插入并回查', async () => {
+    const sqlite = new DatabaseSync(':memory:')
+    const ledgerDb = new Kysely({ dialect: nodeSqliteDialect(sqlite) })
+    const dataDb = new Kysely<DataDatabase>({ dialect: nodeSqliteDialect(sqlite) })
+
+    const migration = compileMigration(null, snapshotOf(comicV1))
+    const applied = await applyMigrations(ledgerDb, [entry(migration.up.join(';\n') + ';')])
+    expect(applied).toHaveLength(1)
+
+    await dataDb.insertInto('comic').values({ id: '1001', title: '示例', author: null }).execute()
+    const rows = await dataDb.selectFrom('comic').selectAll().execute()
+    expect(rows).toEqual([{ id: '1001', title: '示例', author: null }])
+    await ledgerDb.destroy()
+    await dataDb.destroy()
+  })
+
+  it('ledger 幂等：重复调用不再应用', async () => {
+    const sqlite = new DatabaseSync(':memory:')
+    const db = new Kysely({ dialect: nodeSqliteDialect(sqlite) })
+    const migration = compileMigration(null, snapshotOf(comicV1))
+    expect(await applyMigrations(db, [entry(migration.up.join(';\n') + ';')])).toHaveLength(1)
+    expect(await applyMigrations(db, [entry(migration.up.join(';\n') + ';')])).toEqual([])
+    await db.destroy()
+  })
+})
+
+describe('migration registry', () => {
+  it('(pluginId, n) 冲突抛错', () => {
+    expect(() => assertUniqueMigrations([entry('', 1), entry('', 1)])).toThrow('序号冲突')
+  })
+
+  it('按插件依赖拓扑与序号排序', () => {
+    const entries = [
+      entry('c2', 2, 'core'),
+      entry('p1', 1, 'plugin-a'),
+      entry('p10', 10, 'plugin-b'),
+    ]
+    const order = sortMigrations(entries, { 'plugin-a': ['plugin-b'] })
+    expect(order.map(item => `${item.pluginId}:${item.n}`)).toEqual([
+      'core:2',
+      'plugin-b:10',
+      'plugin-a:1',
+    ])
+  })
+
+  it('依赖环抛错', () => {
+    const entries = [entry('', 1, 'a'), entry('', 1, 'b')]
+    expect(() => sortMigrations(entries, { a: ['b'], b: ['a'] })).toThrow('环')
+  })
+
+  it('未知依赖抛错', () => {
+    const entries = [entry('', 1, 'a')]
+    expect(() => sortMigrations(entries, { a: ['ghost'] })).toThrow('未知')
+  })
+})

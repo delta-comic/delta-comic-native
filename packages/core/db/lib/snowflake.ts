@@ -48,8 +48,7 @@ export class SnowflakeGenerator {
       this.#sequence = 0n
     }
     this.#lastTimestamp = timestamp
-    const id =
-      (timestamp << TIMESTAMP_SHIFT) | (BigInt(entityType) << TYPE_SHIFT) | this.#sequence
+    const id = (timestamp << TIMESTAMP_SHIFT) | (BigInt(entityType) << TYPE_SHIFT) | this.#sequence
     return id.toString(10)
   }
 }
@@ -57,7 +56,7 @@ export class SnowflakeGenerator {
 /** 分解 ID 位段（十进制字符串输入）。 */
 export function parseSnowflake(id: string): ParsedSnowflake {
   const value = BigInt(id)
-  if (value < 0n || value >> TIMESTAMP_SHIFT >> SNOWFLAKE_TIMESTAMP_BITS !== 0n) {
+  if (value < 0n || (value >> TIMESTAMP_SHIFT) >> SNOWFLAKE_TIMESTAMP_BITS !== 0n) {
     throw new RangeError(`不是合法雪花 ID：${id}`)
   }
   return {
