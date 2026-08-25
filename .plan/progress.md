@@ -85,3 +85,14 @@ Phase 4 数据层基础设施：TypeBox 表 DSL -> snapshot -> diff -> up/down .
 
 ### 下一步
 Phase 5 启动链路：loader plugin 发现/校验/依赖图/migration 排序/Cordis activation、插件状态机、恢复界面。
+
+## Session 2026-08-25（AI 调试通道设计落盘）
+
+### 裁决
+- 新增子系统「Dev MCP」（architecture.md §13）：AI 客户端经标准 MCP 协议远程观察/操控运行中的应用，目标是 IDE 内 Agent 自主完成"看状态→查数据→触发动作→验证结果"调试闭环；生产构建零包含。
+- 拓扑=桥接模式：`scripts/dev-mcp`（MCP server stdio + 多设备 WS hub + 配对 token）↔ `packages/plugins/debug`（官方插件，`__DEV__` 门控，应用主动外连 loopback WebSocket）。Web 无法监听端口、Android 常驻监听需前台服务——桥接是唯一四端同构形态。
+- 工具面两档：观察（app_info/plugin_list/plugin_detail/db_schema/db_query 只读/logs_tail/logs_search/events_recent 环形捕获/registry_list/diagnostics_export 复用 §10）+ 操控（plugin_reload/enable/disable 驱动 §5 状态机与恢复界面、navigate 驱动 NavigationService）。写库与 eval_js 默认关闭走配置门控；screenshot 渐进（Web DOM 先行）。
+- 线协议 TypeBox schemas 进 protocol/lib/debug.ts 两端共享；MCP SDK 用官方 @modelcontextprotocol/sdk（自定义 Transport 桥接 WS）；全部调用写审计日志。
+
+### 归属
+- 新 Phase 7「AI 调试通道（Dev MCP）」插入 Shell/导航之后——此时状态机+导航已就绪，后续 Feed/Player/业务插件阶段即可被 AI 自主调试辅助；旧 7~12 顺延为 8~13；构建库（新 12）负责 dev-mcp 接入 vp dev 工作流与生产零包含验证。

@@ -153,3 +153,30 @@ Native Host -> minimal loader plugin -> db open + core migration
 - 宿主四端单一 semver 同步发布（GitHub Releases）；核心协议版本与宿主版本号相同（不做独立 protocolVersion）。
 - 应用内检查更新提示、手动确认安装；Web 直接部署。
 - 插件兼容门禁复用启动时 manifest 校验+回滚机制。
+
+## 13. AI 调试通道（开发期 Dev MCP）
+
+定位：开发期专属的 AI 自主调试基础设施。IDE 内编码 Agent（Claude Code/Cursor 等）经标准 MCP 协议远程观察与操控运行中的应用实例，无需人工转述即可自主完成"看状态→查数据→触发动作→验证结果"的调试闭环。生产构建零包含。
+
+### 13.1 拓扑（桥接模式）
+
+```
+AI 客户端 ──stdio（可选 Streamable HTTP）── scripts/dev-mcp ── WebSocket(loopback) ── 应用内 debug 插件
+```
+
+- 应用侧不监听端口：Web 端浏览器无法监听、Android 常驻监听需前台服务，故统一为应用主动外连 dev-mcp 的 WebSocket——桥接是唯一四端同构形态。
+- `scripts/dev-mcp`（脚本包）：对上暴露 MCP server（stdio 为主）；对下维护多路应用 WS 连接（多设备/多平台并存，按 appId 寻址），把 tool call 桥接转发到目标应用并回传结果；启动时打印配对 token 与接入指引。
+- `packages/plugins/debug`（官方插件，仅 dev 构建激活）：注入 db/loader/registry/logger/navigation 等服务，内部状态投影为工具可查询数据；命令执行只走既有服务公开 API。
+- 线协议 TypeBox schema 定义于 `packages/core/protocol`（lib/debug.ts），两端共享同一校验源。
+
+### 13.2 工具面
+
+- 观察：`app_info`（版本/平台/启动 span）、`plugin_list`/`plugin_detail`（§5 状态机快照、manifest、错误）、`db_schema`（表 DSL 快照+migration ledger）、`db_query`（只读 SQL）、`logs_tail`/`logs_search`（scope/level 过滤）、`events_recent`（change batch、edge-changed 等环形捕获窗口）、`registry_list`（UIRegistry/路由/player 输入注册表现状）、`diagnostics_export`（复用 §10 导出）。
+- 操控：`plugin_reload`/`plugin_enable`/`plugin_disable`（驱动 §5 状态机与恢复界面，AI 可自主复现故障路径并验证恢复流程）、`navigate(key, params)`（驱动 §6 NavigationService）。
+- 扩展点：写库与 `eval_js` 默认关闭、dev-mcp 配置显式开启；screenshot 按 platform capability 渐进提供（Web DOM 序列化先行）。
+
+### 13.3 安全边界
+
+- 编译期 `__DEV__` 常量折叠：生产 bundle 不含 debug 插件代码；
+- dev-mcp 仅绑定 loopback，应用接入需配对 token；
+- 操控类工具逐项配置门控，全部调用写入宿主审计日志（§7）。

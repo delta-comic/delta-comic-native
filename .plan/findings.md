@@ -53,3 +53,16 @@
 ## 仓库现状（2026-08-25）
 - 根目录骨架 + packages/*/* workspace（pnpm-workspace.yaml）；尚无业务包。
 - 工具链 Vite+（vp）：install/fmt/lint/check/staged/run set-ver；TS7 catalog；cspell 进 pre-commit。
+
+## Dev MCP / AI 调试通道调研（2026-08-25）
+
+| 方案 | 结论 |
+|---|---|
+| 应用内起 MCP HTTP server | 否决——Web 端浏览器无法监听端口；Android 常驻监听需前台服务+原生模块；四端不统一 |
+| 桥接模式（应用外连 dev-mcp WS） | 首选——唯一四端同构形态，复用既有 dev 通道心智 |
+| MCP 官方 TS SDK `@modelcontextprotocol/sdk` | 采用——stdio 与 Streamable HTTP 双传输一等公民；自定义 Transport 是文档化扩展点（LoopbackTransport 先例），WS 桥接=实现一个 Transport 对；v1.x 稳定线（2.0 拆包 alpha 观察中，实施时按 catalog 现状钉版本） |
+| React DevTools / Redux DevTools 式内嵌面板 | 不符合诉求——目标读者是 IDE 内编码 Agent，标准 MCP 协议可直接被客户端消费 |
+
+- 拓扑定案：`AI 客户端 ─stdio─ scripts/dev-mcp ─WS(loopback)─ packages/plugins/debug`；多设备并存按 appId 寻址。
+- plugin_detail 数据源现成：Cordis `ctx.registry` 可遍历 fiber 树取 PENDING/error 状态（skill 已有先例）；§5 状态机快照 + §3.3 migration ledger 均为已有基础设施的投影。
+- 安全三件套：编译期 `__DEV__` 折叠零包含 / loopback 绑定+配对 token / 操控类工具逐项配置门控+审计日志。
