@@ -6,6 +6,7 @@
 
 - **四端**：Android / Web / macOS / Windows。Bare React Native 路线：Community CLI 管宿主与原生工程；React Native Web / react-native-macos / react-native-windows 覆盖对应平台。Expo 仅作为 Modules API 按需使用（如 expo-image），不作为应用工作流。
 - **New Architecture 基础保留**：Fabric、TurboModules、JSI、Codegen 为基础能力。
+- **Cordis 为贯穿整个应用的元框架**：Service/Events/effect/loader 构成应用运行时基座——服务发现、依赖注入、生命周期、事件总线、配置与热更新全部由 Cordis 承担；UIRegistry、数据 Repository、scheduler、NavigationService、capability 等所有跨插件协议均以 Cordis service/event 形态表达，宿主与动态插件共享同一套上下文模型。
 - **all-in-plugin**：`packages/*/*` 下每个子 repo 都是一个独立 Cordis plugin；应用入口极薄，只负责挂载 Cordis root 与启动 loader。插件支持远程动态加载 JS 与资源；无沙箱模型，用户安装即同意其拥有宿主扩展权限；动态插件不可新增原生二进制，原生能力全部由宿主或官方 capability plugin 预注册。
 - **插件市场为外部项目**：负责认证、作者身份、签名审核、目录、分发、安装/更新/卸载/回滚/状态同步。客户端只定义并消费 Market Adapter 协议：`catalog / install / update / uninstall / rollback / status`。权限决策归市场，客户端提供 capability 门控、审计日志、错误反馈协议。
 - **插件包**：`plugin.zip` = `manifest.json` + 入口 + chunks + assets + types + sourcemaps。入口采用 common + platform override：任意 plugin 可声明 `common/web/android/macos/windows` 入口，manifest 显式声明平台、入口、fallback、能力依赖。

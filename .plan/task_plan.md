@@ -6,7 +6,7 @@
 ## 权威参考
 - `docs/architecture.md` — 全部架构决策（唯一权威）
 - `docs/design-language.md` — 设计语言与 token
-- AGENTS.md — 工具链约定（vp / Node 25.9.0 / pnpm 12 rc / TS7 / 2 空格无分号单引号 100 列）
+- AGENTS.md — 工具链约定（vp / Node 26.2.0 / pnpm 12 rc / TS7 / 2 空格无分号单引号 100 列）
 
 ## Phases
 

@@ -3,7 +3,7 @@
 ## 工具链
 
 - 使用 Vite+（`vp`），不要直接运行 `pnpm`、`vite`、`vitest`、`oxlint` 或 `oxfmt`
-  命令。仓库固定使用 Node `25.9.0`、pnpm `12.0.0-rc.3` 和
+  命令。仓库固定使用 Node `26.2.0`、pnpm `12.0.0-rc.3` 和
   `nightly-2026-08-12` Rust 工具链（MSRV `1.95.0`，2024 edition）。
 - 拉取依赖变更后运行 `vp install`。CI 使用 `vp install --frozen-lockfile`。
 
