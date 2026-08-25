@@ -177,7 +177,7 @@ export async function rollbackMigrations(
   for (const entry of [...entries].reverse()) {
     if (!done.has(`${entry.pluginId}/${entry.n}`)) continue
     await db.transaction().execute(async trx => {
-      if (entry.down.trim() !== '') await sql.raw(entry.down).execute(trx)
+      if (/[^\s;]/.test(entry.down)) await sql.raw(entry.down).execute(trx)
       await trx
         .deleteFrom(MIGRATION_LEDGER_TABLE)
         .where('plugin_id', '=', entry.pluginId)

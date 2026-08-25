@@ -125,7 +125,7 @@ export type TableRow<C extends Record<string, ColumnBuilder>> = {
   [K in keyof C]: RowValue<C[K]>
 }
 
-/** 由表定义集合推导 Kysely Database 形状。 */
-export type DatabaseOf<T extends readonly TableDef[]> = {
+/** 由表定义集合推导 Kysely Database 形状（AnyTableDef 约束规避不变性）。 */
+export type DatabaseOf<T extends readonly AnyTableDef[]> = {
   [D in T[number] as D['name']]: TableRow<D['columns']>
 }
