@@ -59,9 +59,13 @@
 - packages/ui/card：WaterfallCard（封面/浏览量 overlay/时长徽章/作者行）+ ItemActionMenu 底部弹层
 
 ### Phase 9: Player 与资源体系
-**Status:** pending
-- player contract 运行时（redirect 递归解析/校验）、PlayerHost fullScreenModal
-- resource repository/runtime/download 三件套 + ResourceScope 生命周期
+**Status:** complete（commit 见 progress.md）
+- protocol：lib/resource.ts（ResourceDescriptor/ResourceProvider/ResourceOpenOptions/RangeUnsupportedError）+ PlayerInstance.render + redirect 放宽为任意注册协议
+- db：resource/download_task 表 + core migration v2（v1 基座冻结）
+- packages/core/resource：ResourceScope（LIFO/幂等）/ResourceRuntimeService（TTL 缓存/abort 联动/best-effort 落库）/双 Repository/DownloadService（断点续传/校验/并发泵/recoverStale）
+- packages/core/player：PlayerService（semver 校验/redirect 递归+判环+深度上限/scope 失败即关/擦除入口 resolveErased）
+- packages/ui/player：phaseForError 纯函数 + PlayerHost（ready/missing/error/resolving + 卸载 dispose+scope.close）+ Routes.player 声明与 openPlayer
+- ui-shell：RootNavigator playerScreen 槽注册 'core/player' fullScreenModal
 
 ### Phase 10: 业务插件
 **Status:** pending

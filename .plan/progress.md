@@ -195,3 +195,30 @@ vp install / vp lint / vp run -r typecheck（29 任务）/ vp test（27 文件 1
 
 ### 下一步
 Phase 9 Player 与资源体系。
+
+## Phase 9：Player 与资源体系（2026-08-26）
+
+### 提交
+- e69f927 feat(protocol)：lib/resource.ts（ResourceDescriptor extends ResourceRef{size?,checksum?{algorithm,digest},mime?}、ResourceOpenOptions{signal?,offset?}、RangeUnsupportedError、ResourceProvider{id,kind,resolve,open→AsyncIterable<Uint8Array>}）；PlayerInstance 增加 render(): ReactNode（protocol 加 react peer）
+- e80a5cf feat(db)：resource 表（PK [kind,ref]）+ download_task 表（PK id）；v1 基座冻结 snapshotOf([pluginStateTable])，新增 n=2 'core-resource-v1'；导出 ResourceRow/DownloadTaskRow
+- 327f124 feat(resource)：ResourceScope（acquire 幂等 lease/onClose LIFO/close 幂等）；ResourceRuntimeService('resources')（kind 唯一注册、describe TTL+容量缓存+best-effort 落库、open 登记 scope 且 close/signal 联动中断流）；ResourceRepository/DownloadTaskRepository；DownloadService('downloads')（六态状态机、sink.probe 断点续传、Range 拒绝清空重传一次、从头取回才校验 checksum、并发泵、pause/resume/cancel/retry/remove/recoverStale、'download/task-changed' 广播）
+- 174bd45 fix(protocol)：PlayerResolveResult redirect 分支放宽为任意已注册协议（映射联合逐项配对 key/input）
+- e5b523c + 9843f19 feat(player)：PlayerService('players')——registerPlayer 唯一 key+semver 校验；resolve 递归展开 redirect：每跳 Value.Check(schema)、visited 判环、MAX_REDIRECT_DEPTH=8、失败先关 scope 再抛 PlayerResolveError{player-missing|input-invalid|redirect-cycle|redirect-depth,key,chain}；resolveErased 字符串擦除入口供宿主路由使用；'player/resolved'{key,providerId,chain}
+- 67e067b feat(ui-player)：phaseForError 纯函数；PlayerHost（请求标识内嵌 state 丢弃过期响应、卸载 dispose+scope.close、missing/error/resolving 呈现、可选 onClose/renderError）；Routes.player augmentation + PLAYER_ROUTE_KEY='core/player' + openPlayer
+- 8d4b815 feat(ui-shell)：RootNavigator 可选 playerScreen 槽 → Stack.Screen name='player' presentation fullScreenModal
+- c90585f test(loader)：ledgerIds 去重适配 core/2；d993af4 style lint+fmt 收尾
+
+### 关键事实（新增）
+- Service.ctx 是 protected：测试监听事件需自建 Context（harness 返回 ctx 再 ctx.on(...)）
+- 测试文件把仅 type-import 的类当值用会运行时 ReferenceError（RangeUnsupportedError is not defined）且 vitest 报错信息藏在任务 error 里
+- vi.fn() 无泛型触发 vitest(require-mock-type-parameters)；onClose 回调箭头体返回值需 void（() => order.push('x') 违反签名）
+- finally 中 return 触发 eslint(no-unsafe-finally)——改为顺序语句
+- React effect 内同步 setState 触发 react(set-state-in-effect)——用「请求标识内嵌结果 + 渲染期比对」替代 reset 式 setState
+- core migration 加版本时旧测试 ledger 断言需同步（pipeline 用去重 pluginId、update 用 `${pluginId}/${n}` 全列）
+- workspace 下游 dist/index.d.ts 缓存：改 protocol 类型后必须重新 vp pack 才能被 player/ui-player 看到
+
+### 验证
+vp install / vp lint（0 error）/ vp fmt / vp test（33 文件 204 passed）/ vp run -r pack（17 包全绿无 OOM）。
+
+### 下一步
+Phase 10 业务插件。
