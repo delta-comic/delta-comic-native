@@ -40,6 +40,7 @@ release
 
 target
 dist-vite
+build
 packages/app/public/runtime/
 *.tsbuildinfo
 packages/*/android/.tauri
