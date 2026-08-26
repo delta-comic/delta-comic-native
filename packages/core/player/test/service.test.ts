@@ -1,23 +1,32 @@
+import type { PlayerInput, PlayerResolveResult } from '@delta-comic/protocol'
+import { ResourceScope } from '@delta-comic/resource'
 import { Type } from 'typebox'
 import { describe, expect, it, vi } from 'vitest'
 
 import { MAX_REDIRECT_DEPTH, PlayerResolveError, PlayerService } from '../lib/service'
-import { createContext } from './util'
-import { ResourceScope } from '@delta-comic/resource'
-
 import type { PlayerProvider, PlayerResolvedEvent } from '../lib/service'
-import type { PlayerInput, PlayerResolveResult } from '@delta-comic/protocol'
+
+import { createContext } from './util'
 
 const ComicSchema = Type.Object({ id: Type.String() })
 const ReaderSchema = Type.Object({ chapter: Type.Number() })
 const HopSchema = Type.Object({ id: Type.String() })
 
-type HopKey = 'hop-1' | 'hop-2' | 'hop-3' | 'hop-4' | 'hop-5' | 'hop-6' | 'hop-7' | 'hop-8' | 'hop-9'
+type HopKey =
+  | 'hop-1'
+  | 'hop-2'
+  | 'hop-3'
+  | 'hop-4'
+  | 'hop-5'
+  | 'hop-6'
+  | 'hop-7'
+  | 'hop-8'
+  | 'hop-9'
 
 declare module '@delta-comic/protocol' {
   interface PlayerInputRegistry {
-    comic: { readonly schema: typeof ComicSchema; readonly version: string }
-    reader: { readonly schema: typeof ReaderSchema; readonly version: string }
+    'comic': { readonly schema: typeof ComicSchema; readonly version: string }
+    'reader': { readonly schema: typeof ReaderSchema; readonly version: string }
     'hop-1': { readonly schema: typeof HopSchema; readonly version: string }
     'hop-2': { readonly schema: typeof HopSchema; readonly version: string }
     'hop-3': { readonly schema: typeof HopSchema; readonly version: string }
@@ -49,7 +58,10 @@ function createHarness(): TestHarness {
   return { ctx, service, scopes }
 }
 
-function instanceOf(providerId: string): { kind: 'instance'; instance: { providerId: string; render: () => null } } {
+function instanceOf(providerId: string): {
+  kind: 'instance'
+  instance: { providerId: string; render: () => null }
+} {
   return { kind: 'instance', instance: { providerId, render: () => null } }
 }
 
@@ -92,7 +104,7 @@ describe('PlayerService', () => {
     const resolved = await harness.service.resolve('comic', { id: 'x' })
     expect(resolved.instance.providerId).toBe('p1')
     expect(resolved.scope.closed).toBe(false)
-    resolved.scope.close()
+    await resolved.scope.close()
     expect(events).toHaveLength(1)
     expect(events[0]).toMatchObject({ key: 'comic', providerId: 'p1', chain: ['comic'] })
   })
@@ -103,7 +115,11 @@ describe('PlayerService', () => {
     harness.service.registerPlayer({
       key: 'comic',
       definition: { schema: ComicSchema, version: '1.0.0' },
-      resolve: async input => ({ kind: 'redirect', key: 'reader', input: { chapter: input.id.length } }),
+      resolve: async input => ({
+        kind: 'redirect',
+        key: 'reader',
+        input: { chapter: input.id.length },
+      }),
     })
     harness.service.registerPlayer({
       key: 'reader',
@@ -136,7 +152,17 @@ describe('PlayerService', () => {
 
   it('超过最大深度抛 redirect-depth', async () => {
     const harness = createHarness()
-    const hops: readonly HopKey[] = ['hop-1', 'hop-2', 'hop-3', 'hop-4', 'hop-5', 'hop-6', 'hop-7', 'hop-8', 'hop-9']
+    const hops: readonly HopKey[] = [
+      'hop-1',
+      'hop-2',
+      'hop-3',
+      'hop-4',
+      'hop-5',
+      'hop-6',
+      'hop-7',
+      'hop-8',
+      'hop-9',
+    ]
     for (let index = 0; index < MAX_REDIRECT_DEPTH; index += 1) {
       const source = hops[index]
       const target = hops[index + 1]

@@ -136,9 +136,9 @@ describe('调试通道 loader 扩展', () => {
 
     await expect(h.service.reload('missing-id')).rejects.toThrow('插件不存在')
     await expect(h.service.disable('missing-id')).rejects.toThrow('插件不存在')
-    await expect(h.service.reload('healthy').then(() => h.service.disable('healthy'))).resolves.toBe(
-      undefined,
-    )
+    await expect(
+      h.service.reload('healthy').then(() => h.service.disable('healthy')),
+    ).resolves.toBe(undefined)
   })
 })
 

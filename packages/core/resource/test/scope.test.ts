@@ -34,7 +34,7 @@ describe('ResourceScope', () => {
     scope.acquire('second')
     first.release()
     first.release()
-    const spy = vi.fn()
+    const spy = vi.fn<() => void>()
     scope.onClose(spy)
     await scope.close()
     expect(spy).toHaveBeenCalledTimes(1)

@@ -41,7 +41,7 @@ export class ResourceScope {
   async close(): Promise<void> {
     if (this.#closed) return
     this.#closed = true
-    for (const lease of [...this.leases]) lease.release()
+    for (const lease of this.leases) lease.release()
     for (const callback of [...this.callbacks].reverse()) await callback()
     this.callbacks.length = 0
   }

@@ -1,3 +1,4 @@
+import { PlayerResolveError, type PlayerService, type ResolvedPlayer } from '@delta-comic/player'
 /**
  * PlayerHost：播放器容器（architecture.md §3.6）。
  *
@@ -5,14 +6,11 @@
  * - 播放器本体 UI 由插件实例 render() 提供，宿主不感知业务形态
  */
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
-
-import { PlayerResolveError, type PlayerService, type ResolvedPlayer } from '@delta-comic/player'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import type {} from 'uniwind/types'
 
 import { phaseForError, type PlayerPhase } from './state'
-
-import type {} from 'uniwind/types'
 
 export interface PlayerHostProps {
   readonly players: PlayerService
@@ -25,29 +23,26 @@ export interface PlayerHostProps {
   readonly renderError?: (error: unknown) => ReactNode
 }
 
+interface ResolveAttempt {
+  readonly playerKey: string
+  readonly input: unknown
+  readonly settled:
+    | { readonly ok: true; readonly value: ResolvedPlayer }
+    | { readonly ok: false; readonly error: unknown }
+}
+
 export function PlayerHost({ players, playerKey, input, onClose, renderError }: PlayerHostProps) {
-  const [phase, setPhase] = useState<PlayerPhase>('resolving')
-  const [resolved, setResolved] = useState<ResolvedPlayer>()
-  const [failure, setFailure] = useState<unknown>()
+  // 以请求标识内嵌结果，渲染期比对丢弃过期响应，避免 effect 内同步 setState。
+  const [attempt, setAttempt] = useState<ResolveAttempt>()
 
   useEffect(() => {
     let active = true
-    setPhase('resolving')
-    setFailure(undefined)
     players.resolveErased(playerKey, input).then(
-      result => {
-        if (!active) {
-          void result.instance.dispose?.()
-          result.scope.close()
-          return
-        }
-        setResolved(result)
-        setPhase('ready')
+      value => {
+        if (active) setAttempt({ playerKey, input, settled: { ok: true, value } })
       },
       error => {
-        if (!active) return
-        setFailure(error)
-        setPhase(error instanceof PlayerResolveError ? phaseForError(error.code) : 'error')
+        if (active) setAttempt({ playerKey, input, settled: { ok: false, error } })
       },
     )
     return () => {
@@ -55,15 +50,28 @@ export function PlayerHost({ players, playerKey, input, onClose, renderError }: 
     }
   }, [players, playerKey, input])
 
-  useEffect(() => {
-    if (resolved === undefined) return undefined
-    return () => {
-      void resolved.instance.dispose?.()
-      resolved.scope.close()
-    }
-  }, [resolved])
+  const current = attempt?.playerKey === playerKey && attempt.input === input ? attempt : undefined
 
-  if (phase === 'ready' && resolved !== undefined) return resolved.instance.render()
+  const settledValue = current?.settled.ok === true ? current.settled.value : undefined
+  useEffect(() => {
+    if (settledValue === undefined) return undefined
+    return () => {
+      void settledValue.instance.dispose?.()
+      void settledValue.scope.close()
+    }
+  }, [settledValue])
+
+  const phase: PlayerPhase =
+    current === undefined
+      ? 'resolving'
+      : current.settled.ok
+        ? 'ready'
+        : current.settled.error instanceof PlayerResolveError
+          ? phaseForError(current.settled.error.code)
+          : 'error'
+  const failure = current?.settled.ok === false ? current.settled.error : undefined
+
+  if (phase === 'ready' && settledValue !== undefined) return settledValue.instance.render()
 
   if (phase === 'resolving') {
     return (
@@ -75,21 +83,17 @@ export function PlayerHost({ players, playerKey, input, onClose, renderError }: 
 
   if (phase === 'missing') {
     return (
-      <PlayerFallback onClose={onClose} label='内容不可用或已下架'>
+      <PlayerFallback label='内容不可用或已下架' onClose={onClose}>
         <Text className='text-sm text-neutral-400'>该内容没有可用的播放器</Text>
       </PlayerFallback>
     )
   }
 
   if (renderError !== undefined) {
-    return (
-      <View className='size-full bg-black'>
-        {renderError(failure)}
-      </View>
-    )
+    return <View className='size-full bg-black'>{renderError(failure)}</View>
   }
   return (
-    <PlayerFallback onClose={onClose} label='播放失败'>
+    <PlayerFallback label='播放失败' onClose={onClose}>
       <Text className='text-sm text-neutral-400'>加载播放器时出现问题，请稍后重试</Text>
     </PlayerFallback>
   )

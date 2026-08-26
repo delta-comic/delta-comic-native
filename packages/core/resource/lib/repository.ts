@@ -25,13 +25,15 @@ export class ResourceRepository {
         updated_at,
       })
       .onConflict(oc =>
-        oc.columns(['kind', 'ref']).doUpdateSet({
-          size_bytes: descriptor.size ?? null,
-          checksum_algorithm: descriptor.checksum?.algorithm ?? null,
-          checksum_digest: descriptor.checksum?.digest ?? null,
-          mime: descriptor.mime ?? null,
-          updated_at,
-        }),
+        oc
+          .columns(['kind', 'ref'])
+          .doUpdateSet({
+            size_bytes: descriptor.size ?? null,
+            checksum_algorithm: descriptor.checksum?.algorithm ?? null,
+            checksum_digest: descriptor.checksum?.digest ?? null,
+            mime: descriptor.mime ?? null,
+            updated_at,
+          }),
       )
       .execute()
   }

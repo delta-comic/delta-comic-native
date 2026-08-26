@@ -1,11 +1,11 @@
+import type { ResourceDescriptor, ResourceProvider } from '@delta-comic/protocol'
 import { describe, expect, it } from 'vitest'
 
 import { ResourceRepository } from '../lib/repository'
 import { ResourceRuntimeService } from '../lib/runtime'
 import { ResourceScope } from '../lib/scope'
-import { createContext, createTestDb } from './util'
 
-import type { ResourceDescriptor, ResourceProvider } from '@delta-comic/protocol'
+import { createContext, createTestDb } from './util'
 
 const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -15,10 +15,7 @@ interface ProviderHarness {
   setDescriptor(descriptor: Partial<ResourceDescriptor>): void
 }
 
-function countingProvider(
-  kind: string,
-  initial?: Partial<ResourceDescriptor>,
-): ProviderHarness {
+function countingProvider(kind: string, initial?: Partial<ResourceDescriptor>): ProviderHarness {
   let calls = 0
   let descriptor: Partial<ResourceDescriptor> = initial ?? {}
   return {
@@ -46,13 +43,9 @@ describe('ResourceRuntimeService', () => {
     const runtime = new ResourceRuntimeService(ctx)
     const harness = countingProvider('file')
     const dispose = runtime.registerProvider(harness.provider)
-    expect(() => runtime.registerProvider({ ...harness.provider, id: 'other' })).toThrow(
-      /重复注册/,
-    )
+    expect(() => runtime.registerProvider({ ...harness.provider, id: 'other' })).toThrow(/重复注册/)
     dispose()
-    expect(() =>
-      runtime.registerProvider({ ...harness.provider, id: 'other' }),
-    ).not.toThrow()
+    expect(() => runtime.registerProvider({ ...harness.provider, id: 'other' })).not.toThrow()
   })
 
   it('describe 命中缓存只 resolve 一次', async () => {

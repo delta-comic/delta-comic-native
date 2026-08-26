@@ -18,14 +18,14 @@
     "semver": "catalog:",
     "typebox": "catalog:"
   },
-  "peerDependencies": {
-    "react": "catalog:"
-  },
   "devDependencies": {
-    "@types/semver": "catalog:",
     "@types/react": "catalog:",
+    "@types/semver": "catalog:",
     "react": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:"
   }
 }

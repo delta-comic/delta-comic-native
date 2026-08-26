@@ -12,22 +12,12 @@ import { RangeUnsupportedError } from '@delta-comic/protocol'
 import { Service, type Context } from 'cordis'
 
 import { DownloadTaskRepository, type StoredDownloadTask } from './repository'
-import { ResourceScope } from './scope'
 import type { ResourceHandle, ResourceRuntimeService } from './runtime'
+import { ResourceScope } from './scope'
 
-export type DownloadStatus =
-  | 'queued'
-  | 'running'
-  | 'paused'
-  | 'completed'
-  | 'failed'
-  | 'cancelled'
+export type DownloadStatus = 'queued' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
 
-export const TERMINAL_STATUSES: readonly DownloadStatus[] = [
-  'completed',
-  'failed',
-  'cancelled',
-]
+export const TERMINAL_STATUSES: readonly DownloadStatus[] = ['completed', 'failed', 'cancelled']
 
 export interface DownloadSnapshot {
   readonly id: string
@@ -59,7 +49,11 @@ export interface DownloadSink {
 }
 
 export class ChecksumMismatchError extends Error {
-  constructor(readonly algorithm: string, readonly expected: string, readonly actual: string) {
+  constructor(
+    readonly algorithm: string,
+    readonly expected: string,
+    readonly actual: string,
+  ) {
     super(`校验和不符（${algorithm}）：期望 ${expected}，实际 ${actual}`)
     this.name = 'ChecksumMismatchError'
   }
@@ -315,11 +309,7 @@ export class DownloadService extends Service {
       throw new Error(`下载大小不符：期望 ${expectedSize}，实际 ${received}`)
     }
     const digest = hasher.digestHex()
-    if (
-      checksum !== undefined &&
-      digest.length > 0 &&
-      digest !== checksum.digest
-    ) {
+    if (checksum !== undefined && digest.length > 0 && digest !== checksum.digest) {
       throw new ChecksumMismatchError(checksum.algorithm, checksum.digest, digest)
     }
   }
@@ -380,10 +370,7 @@ function toStored(task: InternalTask): StoredDownloadTask {
   }
 }
 
-const nullDigest: DigestStream = {
-  update: () => {},
-  digestHex: () => '',
-}
+const nullDigest: DigestStream = { update: () => {}, digestHex: () => '' }
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)

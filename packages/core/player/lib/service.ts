@@ -1,3 +1,11 @@
+import type {
+  PlayerInput,
+  PlayerInputDefinition,
+  PlayerInstance,
+  PlayerKey,
+  PlayerResolveResult,
+} from '@delta-comic/protocol'
+import { ResourceScope } from '@delta-comic/resource'
 /**
  * Player 注册与解析服务（architecture.md §3.6）。
  *
@@ -9,15 +17,6 @@
 import { Service, type Context, type Disposable } from 'cordis'
 import { valid } from 'semver'
 import { Value } from 'typebox/value'
-
-import { ResourceScope } from '@delta-comic/resource'
-import type {
-  PlayerInput,
-  PlayerInputDefinition,
-  PlayerInstance,
-  PlayerKey,
-  PlayerResolveResult,
-} from '@delta-comic/protocol'
 
 /** redirect 递归最大深度（含起点与终点的跳数上限）。 */
 export const MAX_REDIRECT_DEPTH = 8

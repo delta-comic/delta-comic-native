@@ -145,15 +145,13 @@ function guardStream(
       const iterator = stream[Symbol.asyncIterator]()
       return {
         next: async () => {
-          try {
-            return await iterator.next()
-          } finally {
-            if (internal.aborted) {
-              outer?.removeEventListener('abort', onOuterAbort)
-              await iterator.return?.(undefined)
-              return { done: true as const, value: undefined }
-            }
+          const result = await iterator.next()
+          if (internal.aborted) {
+            outer?.removeEventListener('abort', onOuterAbort)
+            await iterator.return?.(undefined)
+            return { done: true as const, value: undefined }
           }
+          return result
         },
         return: async value => {
           outer?.removeEventListener('abort', onOuterAbort)

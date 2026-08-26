@@ -67,10 +67,7 @@ interface PlayerScreenParams {
 function renderPlayerSlot(playerScreen: RootNavigatorProps['playerScreen']) {
   if (playerScreen === undefined) return null
   return (
-    <Stack.Screen
-      name='player'
-      options={{ presentation: 'fullScreenModal', headerShown: false }}
-    >
+    <Stack.Screen name='player' options={{ presentation: 'fullScreenModal', headerShown: false }}>
       {routeProps => {
         // 存在类型还原点：params 仅经 openPlayer()/linking 写入且受 Routes 约束，
         // 导航容器运行时回读宽类型，此处对齐 'player' 路由声明的参数结构。

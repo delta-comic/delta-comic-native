@@ -1,16 +1,16 @@
 import { createHash } from 'node:crypto'
 
+import { RangeUnsupportedError } from '@delta-comic/protocol'
+import type { ResourceProvider } from '@delta-comic/protocol'
+import type { Context } from 'cordis'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ChecksumMismatchError, DownloadService, type DownloadSnapshot } from '../lib/download'
+import type { DownloadSink } from '../lib/download'
 import { DownloadTaskRepository } from '../lib/repository'
 import { ResourceRuntimeService } from '../lib/runtime'
-import { createContext, createTestDb } from './util'
-import { RangeUnsupportedError } from '@delta-comic/protocol'
-import type { Context } from 'cordis'
 
-import type { DownloadSink } from '../lib/download'
-import type { ResourceProvider } from '@delta-comic/protocol'
+import { createContext, createTestDb } from './util'
 
 const sha256Hex = (data: Uint8Array): string => createHash('sha256').update(data).digest('hex')
 
@@ -305,9 +305,7 @@ describe('DownloadService', () => {
     const harness = await createHarness(provider)
     try {
       await harness.service.enqueue('d1', 'file', 'r', 'dest-1')
-      await expect(harness.service.enqueue('d1', 'file', 'r', 'dest-1')).rejects.toThrow(
-        /已存在/,
-      )
+      await expect(harness.service.enqueue('d1', 'file', 'r', 'dest-1')).rejects.toThrow(/已存在/)
       await harness.service.remove('d1')
     } finally {
       await harness.destroy()
@@ -388,9 +386,7 @@ describe('DownloadService', () => {
       await harness.service.recoverStale()
       await harness.waitForStatus('stale', 'completed')
       expect(harness.sink.data('dest-stale')).toEqual(full)
-      await expect(harness.tasks.get('stale')).resolves.toMatchObject({
-        status: 'completed',
-      })
+      await expect(harness.tasks.get('stale')).resolves.toMatchObject({ status: 'completed' })
     } finally {
       await harness.destroy()
     }
@@ -401,10 +397,7 @@ describe('DownloadService', () => {
     const provider: ResourceProvider = {
       id: 'p',
       kind: 'file',
-      resolve: async ref => ({
-        ...ref,
-        checksum: { algorithm: 'md5-unknown', digest: 'x' },
-      }),
+      resolve: async ref => ({ ...ref, checksum: { algorithm: 'md5-unknown', digest: 'x' } }),
       open() {
         async function* generate(): AsyncGenerator<Uint8Array> {
           yield chunk

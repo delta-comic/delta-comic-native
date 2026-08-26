@@ -127,14 +127,8 @@ describe('UIRegistryService.entries', () => {
       component: () => 'b',
     })
     expect(service.entries()).toEqual([
-      {
-        key: 'ui/button',
-        items: [{ id: 'core', version: '1.0.0', priority: 0 }],
-      },
-      {
-        key: 'ui/banner',
-        items: [{ id: 'ext', version: '2.1.0', priority: 5 }],
-      },
+      { key: 'ui/button', items: [{ id: 'core', version: '1.0.0', priority: 0 }] },
+      { key: 'ui/banner', items: [{ id: 'ext', version: '2.1.0', priority: 5 }] },
     ])
 
     disposable()
