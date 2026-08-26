@@ -1,8 +1,8 @@
+import { createContext, useContext, type ReactNode } from 'react'
 /**
  * Web 端占位：safe-area-context 在 Web 无实际内嵌差异，零值直通。
  */
 import { View } from 'react-native'
-import { createContext, useContext, type ReactNode } from 'react'
 
 export interface Insets {
   readonly top: number
@@ -13,12 +13,7 @@ export interface Insets {
 
 export const initialWindowMetrics = null
 
-export const SafeAreaContext = createContext<Insets>({
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-})
+export const SafeAreaContext = createContext<Insets>({ top: 0, bottom: 0, left: 0, right: 0 })
 
 export const SafeAreaInsetsContext = SafeAreaContext
 

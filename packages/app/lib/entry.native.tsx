@@ -3,12 +3,12 @@ import type { ModuleEvaluator } from '@delta-comic/runtime'
 import { Context } from 'cordis'
 import type { Kysely } from 'kysely'
 import { useEffect, useState } from 'react'
+import { AppRegistry, Text, View } from 'react-native'
 /**
  * RN 端入口（android/macos/windows 共用）：
  * 原生工程经 JSI 注入 globalThis.__DELTA_HOST__ 桥后注册根组件。
  */
 import type {} from 'uniwind/types'
-import { AppRegistry, Text, View } from 'react-native'
 
 import { AppRoot } from './app-root.tsx'
 import { createApp } from './bootstrap.ts'
