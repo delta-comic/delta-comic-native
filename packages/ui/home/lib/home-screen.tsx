@@ -35,8 +35,8 @@ export function HomeScreen({ feed, onOpenItem, resolvePreview }: HomeScreenProps
     [feed, surfaceId],
   )
   const snapshot = useSyncExternalStore(
-    session?.subscribe ?? subscribeNoop,
-    session?.getSnapshot ?? snapshotNoop,
+    session === undefined ? subscribeNoop : listener => session.subscribe(listener),
+    session === undefined ? snapshotNoop : () => session.getSnapshot(),
   )
 
   useEffect(() => {
