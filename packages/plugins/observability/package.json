@@ -1,0 +1,26 @@
+{
+  "name": "@delta-comic/plugin-observability",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./lib/index.ts"
+    }
+  },
+  "scripts": {
+    "pack": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@delta-comic/db": "workspace:*",
+    "cordis": "catalog:",
+    "kysely": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
