@@ -1,0 +1,34 @@
+{
+  "name": "@delta-comic/ui-bookshelf",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./lib/index.tsx"
+    }
+  },
+  "scripts": {
+    "pack": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@delta-comic/library": "workspace:*",
+    "@delta-comic/navigation": "workspace:*",
+    "@delta-comic/protocol": "workspace:*",
+    "@delta-comic/resource": "workspace:*",
+    "uniwind": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "react": "catalog:",
+    "react-native": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-native": "catalog:"
+  }
+}
