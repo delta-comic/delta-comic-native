@@ -3,19 +3,29 @@ import { DatabaseSync } from 'node:sqlite'
 import { Kysely, sql } from 'kysely'
 import { describe, expect, it } from 'vitest'
 
-import { coreMigrations, pluginStateTable, type CoreDatabase } from '../lib/core-tables'
+import {
+  coreMigrations,
+  downloadTaskTable,
+  pluginStateTable,
+  resourceTable,
+  type CoreDatabase,
+} from '../lib/core-tables'
 import { nodeSqliteDialectFrom } from '../lib/driver'
 import { applyMigrations, readLedger } from '../lib/migrator'
 
 describe('core tables', () => {
-  it('coreMigrations 建表并可读写 plugin_state', async () => {
+  it('coreMigrations 建表并可读写三表', async () => {
     const sqlite = new DatabaseSync(':memory:')
     const db = new Kysely<CoreDatabase>({ dialect: nodeSqliteDialectFrom(sqlite) })
     const ledger = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
 
     const applied = await applyMigrations(ledger, [...coreMigrations])
-    expect(applied).toHaveLength(1)
+    expect(applied).toHaveLength(2)
     expect(applied[0]).toMatchObject({ pluginId: 'core', n: 1 })
+    expect(applied[1]).toMatchObject({ pluginId: 'core', n: 2, name: 'core-resource-v1' })
+    // v1 基座冻结：不涉及资源域两表。
+    expect(coreMigrations[0]?.up).not.toContain('resource')
+    expect(coreMigrations[0]?.up).not.toContain('download_task')
 
     const row = {
       plugin_id: 'sample',
@@ -28,24 +38,63 @@ describe('core tables', () => {
     const rows = await db.selectFrom(pluginStateTable.name).selectAll().execute()
     expect(rows).toEqual([row])
 
+    await db
+      .insertInto(resourceTable.name)
+      .values({
+        kind: 'image',
+        ref: 'https://example.test/a.jpg',
+        size_bytes: 1024,
+        checksum_algorithm: 'sha256',
+        checksum_digest: 'aa',
+        mime: 'image/jpeg',
+        updated_at: '2026-08-25T00:00:00.000Z',
+      })
+      .execute()
+    const resources = await db.selectFrom(resourceTable.name).selectAll().execute()
+    expect(resources).toHaveLength(1)
+
+    await db
+      .insertInto(downloadTaskTable.name)
+      .values({
+        id: 'task-1',
+        kind: 'image',
+        ref: 'https://example.test/a.jpg',
+        dest_key: 'downloads/a.jpg',
+        status: 'queued',
+        received_bytes: 0,
+        total_bytes: 1024,
+        error: null,
+        created_at: '2026-08-25T00:00:00.000Z',
+        updated_at: '2026-08-25T00:00:00.000Z',
+      })
+      .execute()
+    const tasks = await db.selectFrom(downloadTaskTable.name).selectAll().execute()
+    expect(tasks).toHaveLength(1)
+
     await sql`DROP TABLE ${sql.table('plugin_state')}`.execute(db)
     await db.destroy()
     await ledger.destroy()
   })
 
-  it('coreMigrations 的 down 可回滚', async () => {
+  it('coreMigrations 的 down 可回滚资源域两表并保留基线', async () => {
     const sqlite = new DatabaseSync(':memory:')
     const ledger = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
     await applyMigrations(ledger, [...coreMigrations])
     const { rollbackMigrations } = await import('../lib/migrator')
     const undone = await rollbackMigrations(ledger, [...coreMigrations])
-    expect(undone).toEqual([{ pluginId: 'core', n: 1, name: 'core-tables-v1' }])
+    expect(undone).toEqual([
+      { pluginId: 'core', n: 2, name: 'core-resource-v1' },
+      { pluginId: 'core', n: 1, name: 'core-tables-v1' },
+    ])
     expect(await readLedger(ledger)).toEqual([])
-    // 基线 migration 的 down 为空：清账但保留基础表结构。
-    const tables = sqlite
-      .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'plugin_state'")
-      .all()
-    expect(tables).toHaveLength(1)
+    // v2 的 down 删除资源域两表；v1 基线的 down 为空：清账但保留基础表结构。
+    const { rows } = await sql<{
+      name: string
+    }>`SELECT name FROM sqlite_master WHERE type = 'table'`.execute(ledger)
+    const names = rows.map(row => row.name)
+    expect(names).toContain('plugin_state')
+    expect(names).not.toContain('resource')
+    expect(names).not.toContain('download_task')
     await ledger.destroy()
   })
 })
