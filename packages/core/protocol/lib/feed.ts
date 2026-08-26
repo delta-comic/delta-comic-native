@@ -79,12 +79,9 @@ const isCreatorRef = (value: unknown): value is CreatorRef =>
   (value.avatar === undefined || isResourceRef(value.avatar))
 
 /**
- * Item -> 快照 JSON。写入方持有完整类型信息，此处仅做结构透传。
+ * 快照 -> JSON。Item 结构性可赋给 ItemSnapshot，调用方持完整类型时直接透传。
  */
-export const serializeItemSnapshot = (item: Item): string => {
-  const snapshot: ItemSnapshot = item
-  return JSON.stringify(snapshot)
-}
+export const serializeItemSnapshot = (item: ItemSnapshot): string => JSON.stringify(item)
 
 /**
  * 快照 JSON -> ItemSnapshot；payload 由 serializeItemSnapshot 写入，
