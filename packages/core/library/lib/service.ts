@@ -5,11 +5,7 @@ import { SnowflakeGenerator, type CoreDatabase } from '@delta-comic/db'
  * - 历史以 item_id 主键 upsert，payload_json 存 Item 快照，进度为插件自决 JSON + 归一化 ratio
  * - 书架 kind 为 favorite | later，(kind, item_id) 唯一；变更后经 Events 广播
  */
-import {
-  parseItemSnapshot,
-  serializeItemSnapshot,
-  type ItemSnapshot,
-} from '@delta-comic/protocol'
+import { parseItemSnapshot, serializeItemSnapshot, type ItemSnapshot } from '@delta-comic/protocol'
 import { Service, type Context } from 'cordis'
 import type { Kysely } from 'kysely'
 
@@ -67,12 +63,7 @@ export class HistoryService extends Service {
     const item = parseItemSnapshot(payloadJson)
     const parsedProgress = progressJson === null ? {} : { progressJson }
     const parsedRatio = progressRatio === null ? {} : { progressRatio }
-    return {
-      ...rest,
-      ...(item === undefined ? {} : { item }),
-      ...parsedProgress,
-      ...parsedRatio,
-    }
+    return { ...rest, ...(item === undefined ? {} : { item }), ...parsedProgress, ...parsedRatio }
   }
 
   /** 记录一次打开：新条目计数 1，重复打开计数 +1 并刷新快照展示字段。 */

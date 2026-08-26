@@ -510,6 +510,40 @@ importers:
         specifier: 'catalog:'
         version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
 
+  packages/ui/bookshelf:
+    dependencies:
+      '@delta-comic/library':
+        specifier: workspace:*
+        version: link:../../core/library
+      '@delta-comic/navigation':
+        specifier: workspace:*
+        version: link:../../core/navigation
+      '@delta-comic/protocol':
+        specifier: workspace:*
+        version: link:../../core/protocol
+      '@delta-comic/resource':
+        specifier: workspace:*
+        version: link:../../core/resource
+      uniwind:
+        specifier: 'catalog:'
+        version: 1.11.0(@expo/metro-config@57.0.10(supports-color@10.2.2)(typescript@7.0.2))(metro-cache@0.87.0(supports-color@10.2.2))(metro-transform-worker@0.87.0(supports-color@10.2.2))(metro@0.87.0(supports-color@10.2.2))(react-native@0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)(tailwindcss@4.3.3)
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-native:
+        specifier: 'catalog:'
+        version: 0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
+
   packages/ui/button:
     devDependencies:
       '@types/react':
@@ -550,6 +584,80 @@ importers:
         specifier: 'catalog:'
         version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
 
+  packages/ui/follow:
+    dependencies:
+      '@delta-comic/navigation':
+        specifier: workspace:*
+        version: link:../../core/navigation
+      '@delta-comic/protocol':
+        specifier: workspace:*
+        version: link:../../core/protocol
+      '@delta-comic/social':
+        specifier: workspace:*
+        version: link:../../core/social
+      '@delta-comic/ui-card':
+        specifier: workspace:*
+        version: link:../card
+      '@delta-comic/ui-waterfall':
+        specifier: workspace:*
+        version: link:../waterfall
+      uniwind:
+        specifier: 'catalog:'
+        version: 1.11.0(@expo/metro-config@57.0.10(supports-color@10.2.2)(typescript@7.0.2))(metro-cache@0.87.0(supports-color@10.2.2))(metro-transform-worker@0.87.0(supports-color@10.2.2))(metro@0.87.0(supports-color@10.2.2))(react-native@0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)(tailwindcss@4.3.3)
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-native:
+        specifier: 'catalog:'
+        version: 0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
+
+  packages/ui/home:
+    dependencies:
+      '@delta-comic/feed':
+        specifier: workspace:*
+        version: link:../../core/feed
+      '@delta-comic/navigation':
+        specifier: workspace:*
+        version: link:../../core/navigation
+      '@delta-comic/protocol':
+        specifier: workspace:*
+        version: link:../../core/protocol
+      '@delta-comic/ui-card':
+        specifier: workspace:*
+        version: link:../card
+      '@delta-comic/ui-waterfall':
+        specifier: workspace:*
+        version: link:../waterfall
+      uniwind:
+        specifier: 'catalog:'
+        version: 1.11.0(@expo/metro-config@57.0.10(supports-color@10.2.2)(typescript@7.0.2))(metro-cache@0.87.0(supports-color@10.2.2))(metro-transform-worker@0.87.0(supports-color@10.2.2))(metro@0.87.0(supports-color@10.2.2))(react-native@0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)(tailwindcss@4.3.3)
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-native:
+        specifier: 'catalog:'
+        version: 0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
+
   packages/ui/list:
     devDependencies:
       '@types/react':
@@ -564,6 +672,34 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+
+  packages/ui/mine:
+    dependencies:
+      '@delta-comic/loader':
+        specifier: workspace:*
+        version: link:../../core/loader
+      '@delta-comic/navigation':
+        specifier: workspace:*
+        version: link:../../core/navigation
+      uniwind:
+        specifier: 'catalog:'
+        version: 1.11.0(@expo/metro-config@57.0.10(supports-color@10.2.2)(typescript@7.0.2))(metro-cache@0.87.0(supports-color@10.2.2))(metro-transform-worker@0.87.0(supports-color@10.2.2))(metro@0.87.0(supports-color@10.2.2))(react-native@0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)(tailwindcss@4.3.3)
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-native:
+        specifier: 'catalog:'
+        version: 0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
 
   packages/ui/player:
     dependencies:
@@ -614,6 +750,43 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+
+  packages/ui/search:
+    dependencies:
+      '@delta-comic/navigation':
+        specifier: workspace:*
+        version: link:../../core/navigation
+      '@delta-comic/protocol':
+        specifier: workspace:*
+        version: link:../../core/protocol
+      '@delta-comic/search':
+        specifier: workspace:*
+        version: link:../../core/search
+      '@delta-comic/ui-card':
+        specifier: workspace:*
+        version: link:../card
+      '@delta-comic/ui-waterfall':
+        specifier: workspace:*
+        version: link:../waterfall
+      uniwind:
+        specifier: 'catalog:'
+        version: 1.11.0(@expo/metro-config@57.0.10(supports-color@10.2.2)(typescript@7.0.2))(metro-cache@0.87.0(supports-color@10.2.2))(metro-transform-worker@0.87.0(supports-color@10.2.2))(metro@0.87.0(supports-color@10.2.2))(react-native@0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2))(react@19.2.8)(tailwindcss@4.3.3)
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-native:
+        specifier: 'catalog:'
+        version: 0.87.0(@babel/core@7.29.7(supports-color@10.2.2))(@types/react@19.2.18)(react@19.2.8)(supports-color@10.2.2)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
 
   packages/ui/shell:
     dependencies:
@@ -7060,6 +7233,7 @@ snapshots:
   '@types/node@26.1.0':
     dependencies:
       undici-types: 8.3.0
+    optional: true
 
   '@types/node@26.2.0':
     dependencies:
@@ -7775,7 +7949,7 @@ snapshots:
 
   chrome-launcher@0.15.2(supports-color@10.2.2):
     dependencies:
-      '@types/node': 26.1.0
+      '@types/node': 26.2.0
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2(supports-color@10.2.2)
@@ -7784,7 +7958,7 @@ snapshots:
 
   chromium-edge-launcher@0.3.0(supports-color@10.2.2):
     dependencies:
-      '@types/node': 26.1.0
+      '@types/node': 26.2.0
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2(supports-color@10.2.2)

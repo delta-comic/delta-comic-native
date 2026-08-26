@@ -170,10 +170,7 @@ const compiledV1 = compileMigration(null, snapshotOf([pluginStateTable]))
 // 资源域基线冻结为三表，保证既有库的 v2 已应用迁移文本不变。
 const resourceEraTables = [pluginStateTable, resourceTable, downloadTaskTable] as const
 
-const compiledV2 = compileMigration(
-  snapshotOf([pluginStateTable]),
-  snapshotOf(resourceEraTables),
-)
+const compiledV2 = compileMigration(snapshotOf([pluginStateTable]), snapshotOf(resourceEraTables))
 
 const compiledV3 = compileMigration(snapshotOf(resourceEraTables), snapshotOf(coreTables))
 

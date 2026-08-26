@@ -60,15 +60,17 @@ export class HistoryRepository {
       .insertInto('item_history')
       .values(values)
       .onConflict(oc =>
-        oc.columns(['item_id']).doUpdateSet({
-          title: values.title,
-          player_key: values.player_key,
-          payload_json: values.payload_json,
-          progress_json: values.progress_json,
-          progress_ratio: values.progress_ratio,
-          opened_count: values.opened_count,
-          last_opened_at: values.last_opened_at,
-        }),
+        oc
+          .columns(['item_id'])
+          .doUpdateSet({
+            title: values.title,
+            player_key: values.player_key,
+            payload_json: values.payload_json,
+            progress_json: values.progress_json,
+            progress_ratio: values.progress_ratio,
+            opened_count: values.opened_count,
+            last_opened_at: values.last_opened_at,
+          }),
       )
       .execute()
   }
@@ -118,8 +120,7 @@ export interface ShelfRecord {
   readonly updatedAt: string
 }
 
-const isShelfKind = (value: string): value is ShelfKind =>
-  value === 'favorite' || value === 'later'
+const isShelfKind = (value: string): value is ShelfKind => value === 'favorite' || value === 'later'
 
 const toShelf = (row: ShelfItemRow): ShelfRecord | undefined => {
   if (!isShelfKind(row.kind)) return undefined

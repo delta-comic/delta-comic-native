@@ -1,7 +1,6 @@
+import { parseItemSnapshot, serializeItemSnapshot, type Item } from '@delta-comic/protocol'
 import { Type } from 'typebox'
 import { describe, expect, it } from 'vitest'
-
-import { parseItemSnapshot, serializeItemSnapshot, type Item } from '@delta-comic/protocol'
 
 const testSchema = () => Type.Object({})
 

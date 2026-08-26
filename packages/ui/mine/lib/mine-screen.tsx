@@ -48,10 +48,7 @@ export function MineScreen({
   onOpenCache,
   onOpenDiagnostics,
 }: MineScreenProps) {
-  const records = useMemo(
-    () => (loader === undefined ? [] : [...loader.diagnostics()]),
-    [loader],
-  )
+  const records = useMemo(() => (loader === undefined ? [] : [...loader.diagnostics()]), [loader])
 
   return (
     <ScrollView className='size-full bg-neutral-950' contentContainerClassName='gap-4 p-3 pb-8'>

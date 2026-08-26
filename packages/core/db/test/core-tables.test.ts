@@ -80,43 +80,49 @@ describe('core tables', () => {
     expect(tasks).toHaveLength(1)
 
     const now = '2026-08-26T00:00:00.000Z'
-    await db.insertInto(subscriptionGroupTable.name).values({
-      id: 'default',
-      title: '默认分组',
-      sort_key: 0,
-      created_at: now,
-      updated_at: now,
-    }).execute()
-    await db.insertInto(subscriptionTable.name).values({
-      id: 'sub-1',
-      target_kind: 'creator',
-      target_id: 'c-1',
-      group_id: 'default',
-      sort_key: 1,
-      created_at: now,
-      updated_at: now,
-    }).execute()
-    await db.insertInto(itemHistoryTable.name).values({
-      item_id: 'item-1',
-      title: '第 1 话',
-      player_key: 'sample/player',
-      payload_json: '{"id":"item-1"}',
-      progress_json: null,
-      progress_ratio: null,
-      opened_count: 1,
-      first_opened_at: now,
-      last_opened_at: now,
-    }).execute()
-    await db.insertInto(shelfItemTable.name).values({
-      id: 'shelf-1',
-      kind: 'favorite',
-      item_id: 'item-1',
-      title: '第 1 话',
-      player_key: 'sample/player',
-      payload_json: '{"id":"item-1"}',
-      created_at: now,
-      updated_at: now,
-    }).execute()
+    await db
+      .insertInto(subscriptionGroupTable.name)
+      .values({ id: 'default', title: '默认分组', sort_key: 0, created_at: now, updated_at: now })
+      .execute()
+    await db
+      .insertInto(subscriptionTable.name)
+      .values({
+        id: 'sub-1',
+        target_kind: 'creator',
+        target_id: 'c-1',
+        group_id: 'default',
+        sort_key: 1,
+        created_at: now,
+        updated_at: now,
+      })
+      .execute()
+    await db
+      .insertInto(itemHistoryTable.name)
+      .values({
+        item_id: 'item-1',
+        title: '第 1 话',
+        player_key: 'sample/player',
+        payload_json: '{"id":"item-1"}',
+        progress_json: null,
+        progress_ratio: null,
+        opened_count: 1,
+        first_opened_at: now,
+        last_opened_at: now,
+      })
+      .execute()
+    await db
+      .insertInto(shelfItemTable.name)
+      .values({
+        id: 'shelf-1',
+        kind: 'favorite',
+        item_id: 'item-1',
+        title: '第 1 话',
+        player_key: 'sample/player',
+        payload_json: '{"id":"item-1"}',
+        created_at: now,
+        updated_at: now,
+      })
+      .execute()
     const groups = await db.selectFrom(subscriptionGroupTable.name).selectAll().execute()
     expect(groups).toHaveLength(1)
     const history = await db.selectFrom(itemHistoryTable.name).selectAll().execute()

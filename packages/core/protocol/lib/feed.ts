@@ -95,8 +95,17 @@ export const parseItemSnapshot = (payloadJson: string): ItemSnapshot | undefined
     return undefined
   }
   if (!isRecordLike(value)) return undefined
-  const { id, title, preview, playerKey, sourceRefs, creatorRefs, viewCount, createdAt, updatedAt } =
-    value
+  const {
+    id,
+    title,
+    preview,
+    playerKey,
+    sourceRefs,
+    creatorRefs,
+    viewCount,
+    createdAt,
+    updatedAt,
+  } = value
   if (
     typeof id !== 'string' ||
     typeof title !== 'string' ||

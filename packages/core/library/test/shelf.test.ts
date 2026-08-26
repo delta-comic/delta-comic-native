@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type { ItemSnapshot } from '@delta-comic/protocol'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ShelfService } from '../lib/service'
 
