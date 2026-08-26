@@ -107,6 +107,9 @@ settings:
 
 catalogs:
   default:
+    '@cordisjs/plugin-timer':
+      specifier: ^1.1.2
+      version: 1.1.2
     '@modelcontextprotocol/server':
       specifier: ^2.0.0
       version: 2.0.0
@@ -446,6 +449,25 @@ importers:
       kysely:
         specifier: 'catalog:'
         version: 0.29.5
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
+
+  packages/core/scheduler:
+    dependencies:
+      '@cordisjs/plugin-timer':
+        specifier: 'catalog:'
+        version: 1.1.2(cordis@4.0.0-rc.8)
+      cordis:
+        specifier: 'catalog:'
+        version: 4.0.0-rc.8
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1357,6 +1379,11 @@ packages:
   '@conventional-changelog/template@1.2.1':
     resolution: {integrity: sha512-TzlTVpKPjaqW6qOYjQcYUDuGsLCNsvFHVBXkYGTAnf5V37jCWrE5haKNXzz0WZUtVHjrpV76L1buANjwXMfT8w==}
     engines: {node: '>=22'}
+
+  '@cordisjs/plugin-timer@1.1.2':
+    resolution: {integrity: sha512-5z5C3Eewt8JzK9XGy5JgIoYFRqXPWZnT7hHFfuJMQNzSom6iEVeLXpYiMvqVqGfJicHA7IroaOjcLRf99sidrQ==}
+    peerDependencies:
+      cordis: ^4.0.0-rc.5
 
   '@cspell/cspell-bundled-dicts@10.0.1':
     resolution: {integrity: sha512-WvkSDNX4Uyyj/ZgbPO6L38iFNMfK1EqsH1FteRiI2qLz6QZMXRFrIt12OqiWIplzZDDaVpBH9FCJOPJll0fjCQ==}
@@ -6090,6 +6117,11 @@ snapshots:
       conventional-commits-parser: 7.1.0
 
   '@conventional-changelog/template@1.2.1': {}
+
+  '@cordisjs/plugin-timer@1.1.2(cordis@4.0.0-rc.8)':
+    dependencies:
+      cordis: 4.0.0-rc.8
+      cosmokit: 1.8.1
 
   '@cspell/cspell-bundled-dicts@10.0.1':
     dependencies:
