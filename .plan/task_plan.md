@@ -96,8 +96,10 @@
 - dev-mcp 接入 vp dev 工作流；生产 bundle 排除 debug 插件（零包含验证）
 
 ### Phase 13: 四端宿主工程
-**Status:** pending
-- Android/macOS/Windows 原生工程 + plugin-loader capability（Hermes/JSI 封装）+ Web 入口
+**Status:** done
+- packages/core/runtime：插件工件层（zip 解压/manifest 校验/sha256 验证/平台入口选择/migrations 发现）+ ESM 求值器缝隙
+- packages/app：宿主装配（mountCoreServices/capability 授权联动/Web 内存库 sql.js）+ Web 入口（vp build 通过）+ RN 入口（__DELTA_HOST__ 桥约定）
+- Android/macOS/Windows 原生工程骨架（官方模板生成，已入库）
 
 ## Decisions Made
 | 决策 | 结论 |
@@ -115,4 +117,4 @@
 |-------|---------|------------|
 
 ## Next Step
-Phase 13：四端宿主工程（Android/macOS/Windows 原生工程 + plugin-loader capability + Web 入口）。
+后续阶段（见 docs/architecture.md）：真机桥接联调、插件市场/分发、业务打磨。

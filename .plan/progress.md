@@ -307,3 +307,30 @@ vp lint（0 error）/ vp fmt / vp test（46 文件 286 passed）/ vp run typeche
 
 ### 验证
 全仓 vp test 52 文件 303 passed / vp lint exit=0 / vp run typecheck 全绿 / vp fmt；debug 插件真实 vp pack 出 build/plugin.zip（4 成员）且 manifest 过 validateManifest、verify-exclusion 行为正确；dcd 启动冒烟（hub :7529 token 打印、vite spawn/转发/exit 关停路径验证）。
+
+## Phase 13 四端宿主工程（2026-08-26）
+
+### 提交链
+- c8dda94 feat(runtime)：插件工件层与入口求值缝隙
+- b282ab3 feat(app)：宿主装配与 Web 入口
+- f4644cb feat(app)：Android/macOS/Windows 原生工程骨架
+
+### 交付物
+- packages/core/runtime（@delta-comic/runtime）：openPluginArtifact（fflate 解压 + manifest.json 解析，ArtifactError{zip|manifest|entry-missing}）、selectEntry（平台覆盖→common 回落）、verifyEntries（对照 manifest.entries+fallback 全量 sha256，@noble/hashes）、discoverFromArtifact（发现期 validateManifest+verifyEntries+parseMigrations——migrations/<n>-<name>.up.sql/.down.sql 对按 n 升序；resolveEntry 求值入口缺 default 抛错）。ModuleEvaluator 缝隙：createEsmEvaluator Blob URL 动态 import（.hbc 拒绝），Hermes 端由原生 JSI 注入实现替换。
+- packages/app（@delta-comic/app, private）：HostSeams/AppHandle 契约；mountCoreServices 装配序（TimerService 必须先于 SchedulerService）；createApp 监听 loader/plugin-state 联动 capability 授权（verified→grant(manifest.capabilities)，disabled/unavailable→revoke）；createZipDirSource（PackageFs 注入 + 单包损坏 onError 跳过）；Web 端 sql.js 内存库 SqlJsDriver + runtime/index.json 来源；entry.web.tsx（vp build 通过）/ entry.native.tsx（globalThis.__DELTA_HOST__ 桥约定，缺失渲染 MissingBridge）。
+- 原生工程骨架：android/（gradle wrapper+app 模块）、macos/（Xcode 工程+Podfile）、windows/（cpp-app 模板 sln/vcxproj），均自官方模板生成入库。
+
+### 关键事实（新增）
+- pnpm-workspace packages glob `packages/*/*` 匹配不到两层目录 packages/app——新增包层级变化时必须核对 glob
+- vitest 加载 vite.config.ts 会执行 plugins 数组——uniwind 等重插件用 process.env.VITEST 守卫跳过
+- esbuild jsx automatic 配置（include 全扩展）解决 workspace 上游包读不到根 tsconfig 的 rolldown JSX PARSE_ERROR
+- RNW 生态 screens/safe-area-context 在 Web 需 stub alias（同一 context 双导出 + 零 insets Provider）
+- uniwind vite 导出名 { uniwind } 非 default 且必传 { cssEntryFile }；global.css 需 @import 'tailwindcss' + @import 'uniwind' 两行
+- react-native-macos-init 的 --version 参数会被重复加前缀报错——预装 node_modules 后省略参数直接跑
+- @react-native-windows/cli require 时即 execSync('where pwsh.exe')，macOS 无 where 导致命令注册失败 unknown command 'init-windows'——shim pwsh.exe/dotnet.exe/where 三件套 + 项目根 react-native.config.js require('react-native-windows/react-native.config.js') 后 init-windows 可用
+- cordis Service 经代理暴露：#private 字段运行时 TypeError，Service 子类一律 TS private
+- capability 授权联动必须幂等去重（grants 已有记录的中间态事件不得 revoke），否则 active 后授权被后续事件清空
+- sql.js Wasm 经 import url from 'sql.js/dist/sql-wasm.wasm?url' 引入；SqlJsDriver 与 node 驱动同形（多语句 exec、returnsRows 前缀、getRowsModified）
+
+### 验证
+全仓 vp test 54 文件 317 passed / vp lint exit=0 / vp run typecheck 全绿 / vp fmt；vp -C packages/app build 成功（1073 modules）。

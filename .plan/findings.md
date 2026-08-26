@@ -110,3 +110,29 @@ v1 基座 → v2 resource 域 → v3 用户域五表 → v4 plugin_endpoint（co
 - cac ^7.0.0 统一解析+分派：bin 取首字母缩写——dcb（plugin-build）/ ddm（dev-mcp）/ dcd（dev）
 - 异步 action 错误捕获必须 cli.parse(argv,{run:false}) + await cli.runMatchedCommand() 包 try/catch 设 process.exitCode
 - Node 26 strip-only 直跑约束（bin 图内全部满足）：相对导入带 .ts 扩展、禁 TS 参数属性（ToolCallError 已改显式赋值）、禁 enum/namespace 等需转换语法
+
+## Phase 13 四端宿主工程落地记录（2026-08-26）
+
+### packages/core/runtime（插件工件层）
+- openPluginArtifact(zipBytes)：fflate unzipSync + manifest.json 解析（ArtifactError{code: zip|manifest|entry-missing}）；Artifact 对象持有 members Map
+- selectEntry(artifact,platform)：entries[platform] → entries.common 回落；verifyEntries 对照 manifest.entries+fallback 全量 sha256（@noble/hashes sha256，catalog ^2.3.0）
+- discoverFromArtifact(bytes,{platform,evaluator})：发现期 validateManifest + verifyEntries + parseMigrations（migrations/<n≥4位>-<name>.up.sql/.down.sql 成对，按 n 升序，MigrationEntry 形状与 db 包一致）；resolveEntry 时选入口+校验+evaluator 求值，缺 default 抛错
+- ModuleEvaluator 缝隙：createEsmEvaluator Blob URL 动态 import（.hbc 直接拒绝）；Hermes 端由原生 JSI 注入 evaluator 实现替换——宿主无需改 runtime 代码即可换字节码引擎
+
+### packages/app（宿主装配）
+- HostSeams{platform,createDb,evaluator,sources,crashHooks?,sink?,storageLayers?} 是四端唯一差异注入面；createApp(ctx,seams) 统一装配
+- mountCoreServices 装配序关键：TimerService 必须先于 SchedulerService（后者 static inject=['timer']）；db 先建后传各 Service 构造参数
+- capability 授权联动：监听 loader/plugin-state——verified 且 grants 无记录时 validateManifest(manifestOf(id)) 通过即 grant(capabilities)；disabled/unavailable 撤销；中间态保持。幂等去重是正确性前提（曾因每事件 revoke 导致 active 后授权丢失）
+- Web 端：sql.js Wasm 内存库 SqlJsDriver（多语句 exec、returnsRows 前缀 SELECT/WITH/PRAGMA/VALUES、collectAll prepare+step、numAffectedRows=getRowsModified）；wasm 经 `import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url'`；插件来源 runtime/index.json {plugins:[{file}]}
+- entry.native.tsx 约定 globalThis.__DELTA_HOST__:{platform:'android'|'macos'|'windows',createDb,evaluator,listOfficialZips,readOfficialZip}（declare global）——原生工程 JSI 注入后 AppRegistry.registerComponent('DeltaComic') 即起
+
+### 原生工程骨架生成备忘
+- Android：`npx @react-native-community/cli@latest init DeltaComic --skip-install --skip-git-init --pm npm --install-pods false`
+- macOS：npm i react-native@~0.81.0 react@19.1.0 react-native-macos@0.81.9 --legacy-peer-deps 预装后 `npx -y react-native-macos-init`（--version 参数会被重复加前缀报错，省略）
+- Windows：shim pwsh.exe/dotnet.exe/where 三件套（$TMPDIR/win-shim，where 对 shim 参数 echo 路径否则 exit 1）+ 项目根 react-native.config.js `module.exports = require('react-native-windows/react-native.config.js')` 后 `./node_modules/.bin/react-native init-windows --overwrite --no-telemetry`（cpp-app 模板）。根因：@react-native-windows/cli require 时即 execSync('where pwsh.exe')，macOS 无 where 则命令注册整体失败
+- 拷入 packages/app/ 后 _gitignore 批量改名 .gitignore；debug.keystore 为 RN 公共默认可提交
+
+### 工具链踩坑补充
+- pnpm-workspace packages glob `packages/*/*` 不匹配两层目录——packages/app 必须显式列出，否则 node_modules 永不链接
+- vitest 会加载 vite.config.ts 并执行 plugins——uniwind 用 process.env.VITEST 守卫跳过；esbuild jsx automatic（include 全扩展名正则）解决上游包 JSX PARSE_ERROR
+- RNW 生态 screens/safe-area-context 的 Web stub：screens-stub.ts 导出同名组件、safe-area-stub.tsx 同一 context 双导出+零 insets Provider+useSafeAreaInsets
