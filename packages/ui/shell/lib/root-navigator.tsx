@@ -20,6 +20,7 @@ import {
 } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createElement, useEffect, useMemo, useRef } from 'react'
+import type { ReactNode } from 'react'
 import { Text, View } from 'react-native'
 
 import { BottomNavigation, type BottomTabItem } from './bottom-navigation'
@@ -49,6 +50,36 @@ export interface RootNavigatorProps {
   readonly onPrimaryAction?: () => void
   /** 四槽标签覆盖，按 TAB_ROUTE_KEYS 顺序。 */
   readonly tabLabels?: readonly [string, string, string, string]
+  /**
+   * 全屏播放器槽：提供后注册 'core/player' fullScreenModal 页，
+   * 渲染参数即 PlayerRouteParams（playerKey + input）。
+   */
+  readonly playerScreen?: (params: { playerKey: string; input: unknown }) => ReactNode
+}
+
+/** 'player' 路由参数结构（与 Routes augmentation 保持一致）。 */
+interface PlayerScreenParams {
+  readonly playerKey: string
+  readonly input: unknown
+}
+
+/** 全屏播放器槽：提供渲染函数时注册 fullScreenModal 页，缺省不挂载。 */
+function renderPlayerSlot(playerScreen: RootNavigatorProps['playerScreen']) {
+  if (playerScreen === undefined) return null
+  return (
+    <Stack.Screen
+      name='player'
+      options={{ presentation: 'fullScreenModal', headerShown: false }}
+    >
+      {routeProps => {
+        // 存在类型还原点：params 仅经 openPlayer()/linking 写入且受 Routes 约束，
+        // 导航容器运行时回读宽类型，此处对齐 'player' 路由声明的参数结构。
+        const params = routeProps.route.params as PlayerScreenParams | undefined
+        if (params === undefined) return null
+        return playerScreen(params)
+      }}
+    </Stack.Screen>
+  )
 }
 
 export function RootNavigator(props: RootNavigatorProps) {
@@ -96,6 +127,7 @@ export function RootNavigator(props: RootNavigatorProps) {
         {split.pushKeys.map(key => (
           <Stack.Screen key={key} name={key} component={createPushEntry(props.ctx.routeRegistry)} />
         ))}
+        {renderPlayerSlot(props.playerScreen)}
       </Stack.Navigator>
     </NavigationContainer>
   )
