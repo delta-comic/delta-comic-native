@@ -59,9 +59,10 @@ export const DebugResponseSchema = Type.Union([
   }),
 ])
 
-export const DebugMessageSchema = Type.Union([DebugHelloSchema, DebugRequestSchema, DebugResponseSchema], {
-  description: '调试 WebSocket 单帧消息',
-})
+export const DebugMessageSchema = Type.Union(
+  [DebugHelloSchema, DebugRequestSchema, DebugResponseSchema],
+  { description: '调试 WebSocket 单帧消息' },
+)
 
 export type DebugHello = Static<typeof DebugHelloSchema>
 export type DebugRequest = Static<typeof DebugRequestSchema>
@@ -93,7 +94,11 @@ export function parseDebugMessage(value: unknown): DebugParseResult {
   return { ok: true, message: value }
 }
 
-export function makeDebugRequest(id: string, tool: string, params: Record<string, unknown>): DebugRequest {
+export function makeDebugRequest(
+  id: string,
+  tool: string,
+  params: Record<string, unknown>,
+): DebugRequest {
   return { v: 1, kind: 'request', id, tool, params }
 }
 
@@ -239,10 +244,7 @@ export const DB_SCHEMA_TOOL: DebugToolDefinition = {
   output: Type.Object(
     {
       tables: Type.Array(
-        Type.Object(
-          { name: Type.String(), ddl: Type.String() },
-          { additionalProperties: false },
-        ),
+        Type.Object({ name: Type.String(), ddl: Type.String() }, { additionalProperties: false }),
       ),
       ledger: Type.Array(
         Type.Object(
@@ -265,10 +267,7 @@ export const DB_QUERY_TOOL: DebugToolDefinition = {
   description: '执行单条只读 SQL（SELECT 或 WITH 开头），返回行数据；上限由 limit 控制。',
   kind: 'observe',
   input: Type.Object(
-    {
-      sql: Type.String({ minLength: 1 }),
-      limit: LimitSchema(1000),
-    },
+    { sql: Type.String({ minLength: 1 }), limit: LimitSchema(1000) },
     { additionalProperties: false },
   ),
   output: Type.Object(
@@ -343,11 +342,7 @@ export const REGISTRY_LIST_TOOL: DebugToolDefinition = {
             key: Type.String({ description: 'UI 分层 key' }),
             items: Type.Array(
               Type.Object(
-                {
-                  id: Type.String(),
-                  version: Type.String(),
-                  priority: Type.Integer(),
-                },
+                { id: Type.String(), version: Type.String(), priority: Type.Integer() },
                 { additionalProperties: false },
               ),
             ),
@@ -429,11 +424,13 @@ export const DEBUG_TOOLS: readonly DebugToolDefinition[] = [
   NAVIGATE_TOOL,
 ]
 
-export const OBSERVE_TOOLS: readonly DebugToolDefinition[] =
-  DEBUG_TOOLS.filter(tool => tool.kind === 'observe')
+export const OBSERVE_TOOLS: readonly DebugToolDefinition[] = DEBUG_TOOLS.filter(
+  tool => tool.kind === 'observe',
+)
 
-export const CONTROL_TOOLS: readonly DebugToolDefinition[] =
-  DEBUG_TOOLS.filter(tool => tool.kind === 'control')
+export const CONTROL_TOOLS: readonly DebugToolDefinition[] = DEBUG_TOOLS.filter(
+  tool => tool.kind === 'control',
+)
 
 export function findDebugTool(name: string): DebugToolDefinition | undefined {
   return DEBUG_TOOLS.find(tool => tool.name === name)
