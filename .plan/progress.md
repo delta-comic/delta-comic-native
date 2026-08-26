@@ -257,4 +257,30 @@ Phase 10 业务插件。
 vp lint（0 error）/ vp fmt / vp test（36 文件 236 passed）/ vp run -r typecheck（51 任务全绿）。
 
 ### 下一步
-Phase 11 平台服务。
+Phase 12 构建库。
+
+## Phase 11 平台服务（2026-08-26）
+
+### 提交链
+- （protocol）feat(protocol)：edge-changed 负载固定形态 {pluginId, edge}（无消费方安全变更）
+- 85b7790 feat(db)：plugin_endpoint 表 + core migration v4
+- 24818cc feat(network)：EdgeRouter 竞速选路与故障转移（probe/repository/service，TTL 复用/退避重探/ensureSelected/withFailover）
+- b82d3cf/7d18c97 fix(network)：cause 序列化 JSON.stringify 消除 no-base-to-string
+- 1d6bb57 feat(scheduler)：timer 原语调度服务（优先级队列+并发上限+every 周期任务+snapshot）
+- a0cabab feat(storage)：存储治理服务（layer 注册制/usage/clearCache 仅易失层/enforce LRU 配额驱逐/quota 动态调整）
+- 9edd5b7 feat(db)：audit_log 表与 core migration v5（loader ledger 断言补 core/5）
+- 0d048f8 feat(capability)：能力门控 grant/assert/guard + 审计日志持久化（deny/invoke/error）+ recentAudit/pruneAuditBefore
+- 8d6c58a feat(observability)：日志捕获环形缓冲+printf 格式化、崩溃捕获钩子（error/rejection→sink+pending）、诊断导出包（logs/plugins/ledger/audit）
+
+### 关键事实（新增）
+- workspace 下游 TS 解析走 dist/index.d.ts：改 protocol/db 后必须先 vp -C <上游> run pack 才能让下游 typecheck 通过
+- cordis Service 实例经代理暴露，#private 字段在代理 receiver 上不可访问——Service 子类一律用 TS private
+- Service 构造器 super() 即注册服务；构造参数校验须放在 super() 之前（不触碰 this 即合法），否则抛错后残留注册
+- @cordisjs/plugin-timer：TimerService 提供 ctx.timer 服务并 mixin timeout/interval/throttle/debounce；timeout(cb,ms)/interval(cb,ms) 返回取消函数；class 插件支持 static inject（Plugin.Constructor extends Base）
+- ctx.logger.exporter 注册在 logger service 单例上全局生效；message={sn,ts,type,name,args}，printf 需自行格式化（%s%d%i%f%o%j 轻量替换）
+- vitest fake timers 会拦截 flush 用例里的真实 setTimeout——文件级 afterEach(vi.useRealTimers)；microFlush 纯微任务排空替代
+- vitest 规则集：toThrow 必须带消息、vi.fn 必须带泛型参数、no-conditional-expect（catch 内禁 expect，改为捕获变量断言）、no-meaningless-void-operator
+- 新建包必须 vp install 链接 node_modules 后测试才能解析依赖
+
+### 验证
+vp lint（0 error）/ vp fmt / vp test（46 文件 286 passed）/ vp run typecheck 全绿；逐包 vp pack 完成（network/scheduler/storage/capability/db/observability）。

@@ -82,9 +82,13 @@
 - packages/ui/mine：设置入口/插件状态投影（八态 badge）/缓存诊断占位
 
 ### Phase 11: 平台服务
-**Status:** pending
-- network(ky)/EdgeRouter(竞速探测/plugin_endpoint 持久化/ensureSelected 兜底/withFailover)/scheduler(@cordisjs/plugin-timer 原语)/storage 治理/capability 门控/审计日志
-- 可观测性文件导出插件 + 崩溃捕获 + 诊断导出
+**Status:** done
+- protocol：edge-changed 负载固定形态 {pluginId, edge}；db v4 plugin_endpoint / v5 audit_log
+- core/network：EdgeRouter（竞速探测/TTL 复用/ensureSelected 兜底/withFailover/退避重探）
+- core/scheduler：@cordisjs/plugin-timer 原语封装（优先级队列+并发上限+周期任务）
+- core/storage：存储治理（layer 注册制适配器/用量聚合/clearCache 仅易失层/LRU 配额驱逐）
+- core/capability：门控（grant/assert/guard）+ 审计日志持久化（deny/invoke/error）
+- plugins/observability：日志捕获环形缓冲 + 崩溃捕获钩子 + 诊断导出包（日志/插件快照/ledger/审计）
 
 ### Phase 12: 构建库
 **Status:** pending

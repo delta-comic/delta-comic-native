@@ -73,3 +73,21 @@
 - **core 存取插件作用域实体**：Item.playerKey 是 keyof PlayerInputRegistry（仅插件可增强），core 域服务要存完整 Item 快照须经 protocol 的 ItemSnapshot（playerKey 放宽为 string）+ serialize/parse 边界函数；parse 采用 loader 同款守卫逐字段校验模式，返回 undefined 表损坏。
 - **UI 页面包最小骨架**：package.json exports（types→dist/index.d.ts、default→lib/index.tsx）+ tsconfig（extends base、include lib/test）+ vite.config.ts pack entry ['lib/index.tsx']；缺 vite.config.ts 时 vp pack 找不到 src/index.ts 报 'No input files'。
 - **oxlint react 规则与 RN 差异**：unbound-method 要求类方法经箭头包装传值；exhaustive-deps 接受解构局部别名；effect 内同步 setState 违规改渲染期 useMemo 派生或请求标识内嵌 state；普通对象当 ref 被禁须 useRef；RN Image 用 resizeMode style（contentFit 属 expo-image）。
+
+## Phase 11 平台服务落地记录（2026-08-26）
+
+### 包拓扑
+- core/network（EdgeRouter）：probe.ts 竞速原语 / repository.ts plugin_endpoint 读写 / service.ts attach({pluginId,version,pluginContext,resolveEdges})；常量 PROBE_TIMEOUT_MS=5s、ENSURE_SELECTED_TIMEOUT_MS=8s、TTL=6h、退避 [30s,2m,5m]；NoEdgeAvailableError code='no-edge-available'
+- core/scheduler：SchedulerService static inject=['timer']，enqueue(run,{priority})/every(id,intervalMs,run)/snapshot()；apply 自动补挂 TimerService
+- core/storage：治理服务只管账目与策略，字节流仍走 resource/download 驱动；registerLayer(adapter{id,kind,list,remove})、usage/clearCache(仅 volatile)/enforce(LRU 按 lastAccessAt)/setQuota
+- core/capability：grant(pluginId,caps) 替换语义支持热重载；assert 硬拒抛 CapabilityDeniedError(code='capability-denied')；guard 记 invoke/error；审计 db 模式 fire-and-forget 落 audit_log + 内存尾部合并读取
+- plugins/observability：attachLogCapture(logger.exporter→RingBuffer+printf)、createMemorySink/createRollingSink(FileAdapter 注入，Phase 13 平台接入)、attachCrashCapture(CrashHooks 抽象，Node 默认 process.on)、exportDiagnostics(logs/plugins/ledger/audit)
+
+### db 迁移链现状
+v1 基座 → v2 resource 域 → v3 用户域五表 → v4 plugin_endpoint（core-network-v1）→ v5 audit_log（core-audit-v1）；era 冻结法：userEraTables 排除 plugin_endpoint+audit_log，networkEraTables 再排除 audit_log，保证既有库已应用迁移文本逐字节不变。ledger 测试断言现至 'core/5'。
+
+### 待宿主接入项（Phase 13）
+- storage：平台 FileAdapter/目录封装注入 layer 实现
+- observability：crashHooks 各端实现（RN 全局错误处理器）、rolling sink 文件路径适配、恢复界面读 crashPending
+- capability：loader 激活时按 manifest.capabilities 调 grant
+- scheduler：idle 预热挂 scheduler.every；resource/download 作为最大消费者接 enqueue
