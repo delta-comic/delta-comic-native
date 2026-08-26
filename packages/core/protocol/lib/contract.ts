@@ -61,6 +61,9 @@ declare module 'cordis' {
      * 负载固定形态以跨越事件边界。全灭时 edge 为 null。
      * @mode emit
      */
-    'protocol/edge-changed'(payload: { readonly pluginId: string; readonly edge: Edge | null }): void
+    'protocol/edge-changed'(payload: {
+      readonly pluginId: string
+      readonly edge: Edge | null
+    }): void
   }
 }
