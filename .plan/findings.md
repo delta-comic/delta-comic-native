@@ -91,3 +91,22 @@ v1 基座 → v2 resource 域 → v3 用户域五表 → v4 plugin_endpoint（co
 - observability：crashHooks 各端实现（RN 全局错误处理器）、rolling sink 文件路径适配、恢复界面读 crashPending
 - capability：loader 激活时按 manifest.capabilities 调 grant
 - scheduler：idle 预热挂 scheduler.every；resource/download 作为最大消费者接 enqueue
+
+## Phase 12 构建库落地记录（2026-08-26）
+
+### 构建流水线形态（scripts/plugin-build，bin dcb）
+- plugin.build.json（插件包根）：{id,name?,version,hostVersion,capabilities,network.multiEdge,runtime{rn,hermes,bytecode,cpu,compileOptions?},dependencies?,hermesc?,entries{common 必填 + web/android/macos/windows 可选 {entry,outDir?}}}
+- pack 流水线：parseBuildConfig(typebox) → runBundles 委托 `vp -C <dir> pack <entry> --out-dir <dir> --format esm [--platform browser]`（common 也显式传 entry，顺序执行）→ hermesc 可选发射 dist/index.hbc → sha256 落账 → assembleManifest→validateManifest（失败 ManifestError 列 issues）→ migrations/** 收集 → fflate zipSync → build/plugin.zip
+- zip 约定：manifest.json / common/index.js(.map/.d.ts/.hbc) / web/index.js / migrations/*；Hermes 平台 entries.android/macos/windows 指向 common/index.hbc（"3+2"），无字节码时回落 common ESM；fallback 字段暂不写（host 默认回落 common）
+- PackRunner/CommandRunner 双注入点：测试用 fake runner 写真实产物文件，hermesc fake copyFileSync 模拟 .hbc
+- verify-exclusion：scanFiles（文本子串）+ scanZip（fflate 解包逐成员）；CLI 命中退出码 1
+
+### dev 工作流（scripts/dev，bin dcd）
+- 单进程编排：DeviceHub + buildTools + createDevMcpServer 进程内装配（经 @delta-comic/dev-mcp 新增 src/index.ts 导出面），serveStdio 占本进程 stdout；vp dev 为子进程 stdio ['ignore','pipe','pipe'] 日志转发 process.stderr
+- resolveVpBin：优先 node_modules/.bin/vp（import.meta.url 相对定位），回退 PATH
+- vite exit → 整体 shutdown（kill + close + hub.stop + exit(code)）；SIGINT/SIGTERM 同路径；settled 防重入
+
+### CLI 约定
+- cac ^7.0.0 统一解析+分派：bin 取首字母缩写——dcb（plugin-build）/ ddm（dev-mcp）/ dcd（dev）
+- 异步 action 错误捕获必须 cli.parse(argv,{run:false}) + await cli.runMatchedCommand() 包 try/catch 设 process.exitCode
+- Node 26 strip-only 直跑约束（bin 图内全部满足）：相对导入带 .ts 扩展、禁 TS 参数属性（ToolCallError 已改显式赋值）、禁 enum/namespace 等需转换语法

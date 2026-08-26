@@ -91,7 +91,7 @@
 - plugins/observability：日志捕获环形缓冲 + 崩溃捕获钩子 + 诊断导出包（日志/插件快照/ledger/审计）
 
 ### Phase 12: 构建库
-**Status:** pending
+**Status:** done
 - dev/build/check/pack/typecheck 流水线；Hermes bytecode + Web ESM "3+2"；plugin.zip 打包
 - dev-mcp 接入 vp dev 工作流；生产 bundle 排除 debug 插件（零包含验证）
 
@@ -115,4 +115,4 @@
 |-------|---------|------------|
 
 ## Next Step
-Phase 11：平台服务（network/EdgeRouter/scheduler/storage 治理/capability 门控）。
+Phase 13：四端宿主工程（Android/macOS/Windows 原生工程 + plugin-loader capability + Web 入口）。

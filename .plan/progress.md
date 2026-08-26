@@ -284,3 +284,26 @@ Phase 12 构建库。
 
 ### 验证
 vp lint（0 error）/ vp fmt / vp test（46 文件 286 passed）/ vp run typecheck 全绿；逐包 vp pack 完成（network/scheduler/storage/capability/db/observability）。
+
+## Phase 12 构建库（2026-08-26）
+
+### 提交链
+- 12b0485 feat(build)：plugin-build 打包库骨架（sha256/zip/hermes/bundle/manifest/pack/exclusion）+ cac 命令行（dcb/ddm）+ 相对导入补 .ts 扩展支持 node 直跑
+- 307312a test(build)：17 个单测/集成测试 + debug 插件 plugin.build.json + 根 .gitignore 忽略 build/
+- ac1e186 feat(dev)：dcd 同进程编排 vp dev 与 dev-mcp（vite 子进程日志转发 stderr，MCP 独占 stdout；DeviceHub/buildTools/createDevMcpServer 经 dev-mcp src/index.ts 复用）
+
+### 交付物
+- scripts/plugin-build（bin dcb）：pack <dir> 流水线 = 读 plugin.build.json → 逐平台 vp pack 委托（common 必建 + web/android/macos/windows 覆盖入口，顺序执行防 OOM）→ 可选 hermesc -emit-binary 字节码 → 逐文件 sha256 → assembleManifest（validateManifest 校验，失败列 issues 抛错）→ 收集 migrations/** → fflate zipSync 写 build/plugin.zip。zip 布局 manifest.json + common/index.js(.map/.d.ts/.hbc) + web/index.js + migrations/*；Hermes 平台 entries 指向 common/index.hbc，无字节码时回落 common ESM。
+- verify-exclusion：文件或 zip 成员标记子串扫描，命中退出码 1（debug 插件 smoke：createDebugPlugin 命中 js/map/d.ts 三处）。
+- scripts/dev（bin dcd）：[root] 定位包目录传给 vp dev；SIGINT/SIGTERM → kill vite + close MCP + hub.stop；vite exit 触发整体 shutdown。
+- CLI 库统一 cac ^7.0.0（catalog 新增），参数解析与子命令分派不自研。
+
+### 关键事实（新增）
+- Node 26 strip-only 直跑 .ts 不支持 TS 参数属性（constructor(readonly x)）与无扩展名相对导入——CLI bin 运行图内全部改显式字段赋值 + './x.ts' 后缀
+- cac v7：cli.parse(argv,{run:false}) + await cli.runMatchedCommand() 才能捕获异步 action 错误；重复 option 自动聚合数组；kebab-case 映射 camelCase options
+- vp pack 支持显式文件参数（vp pack lib/web.ts --out-dir dist-web --platform browser），平台覆盖构建无需改 vite.config
+- fflate zipSync/unzipSync 零依赖够用；manifest.json 独立于成员表先写入
+- dcd 下 vite 子进程必须 stdio pipe 转发 stderr——serveStdio 的 MCP JSON-RPC 独占 stdout，混写即坏帧
+
+### 验证
+全仓 vp test 52 文件 303 passed / vp lint exit=0 / vp run typecheck 全绿 / vp fmt；debug 插件真实 vp pack 出 build/plugin.zip（4 成员）且 manifest 过 validateManifest、verify-exclusion 行为正确；dcd 启动冒烟（hub :7529 token 打印、vite spawn/转发/exit 关停路径验证）。
