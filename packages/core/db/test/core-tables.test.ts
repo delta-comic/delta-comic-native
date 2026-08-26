@@ -4,6 +4,7 @@ import { Kysely, sql } from 'kysely'
 import { describe, expect, it } from 'vitest'
 
 import {
+  auditLogTable,
   coreMigrations,
   downloadTaskTable,
   itemHistoryTable,
@@ -25,19 +26,22 @@ describe('core tables', () => {
     const ledger = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
 
     const applied = await applyMigrations(ledger, [...coreMigrations])
-    expect(applied).toHaveLength(4)
+    expect(applied).toHaveLength(5)
     expect(applied[0]).toMatchObject({ pluginId: 'core', n: 1 })
     expect(applied[1]).toMatchObject({ pluginId: 'core', n: 2, name: 'core-resource-v1' })
     expect(applied[2]).toMatchObject({ pluginId: 'core', n: 3, name: 'core-user-v1' })
     expect(applied[3]).toMatchObject({ pluginId: 'core', n: 4, name: 'core-network-v1' })
+    expect(applied[4]).toMatchObject({ pluginId: 'core', n: 5, name: 'core-audit-v1' })
     // v1 基座冻结：不涉及资源域两表。
     expect(coreMigrations[0]?.up).not.toContain('resource')
     expect(coreMigrations[0]?.up).not.toContain('download_task')
     // v2 冻结在资源域：不涉及用户域四表。
     expect(coreMigrations[1]?.up).not.toContain('subscription_group')
     expect(coreMigrations[1]?.up).not.toContain('item_history')
-    // v3 冻结在用户域：不涉及网络域端点表。
+    // v3 冻结在用户域：不涉及网络域端点表与审计表。
     expect(coreMigrations[2]?.up).not.toContain('plugin_endpoint')
+    // v4 冻结在网络域：不涉及审计表。
+    expect(coreMigrations[3]?.up).not.toContain('audit_log')
 
     const row = {
       plugin_id: 'sample',
@@ -167,6 +171,21 @@ describe('core tables', () => {
     expect(endpoints[0]).toMatchObject({ url: 'https://edge-a.example.test', latency_ms: 120 })
     expect(endpoints[1]).toMatchObject({ url: 'https://edge-b.example.test', latency_ms: null })
 
+    await db
+      .insertInto(auditLogTable.name)
+      .values({
+        id: '0000000000000-1',
+        at: now,
+        kind: 'deny',
+        plugin_id: 'sample',
+        capability: 'notify',
+        detail: '{"reason":"not-granted"}',
+      })
+      .execute()
+    const audits = await db.selectFrom(auditLogTable.name).selectAll().orderBy('at').execute()
+    expect(audits).toHaveLength(1)
+    expect(audits[0]).toMatchObject({ kind: 'deny', capability: 'notify' })
+
     await sql`DROP TABLE ${sql.table('plugin_state')}`.execute(db)
     await db.destroy()
     await ledger.destroy()
@@ -179,6 +198,7 @@ describe('core tables', () => {
     const { rollbackMigrations } = await import('../lib/migrator')
     const undone = await rollbackMigrations(ledger, [...coreMigrations])
     expect(undone).toEqual([
+      { pluginId: 'core', n: 5, name: 'core-audit-v1' },
       { pluginId: 'core', n: 4, name: 'core-network-v1' },
       { pluginId: 'core', n: 3, name: 'core-user-v1' },
       { pluginId: 'core', n: 2, name: 'core-resource-v1' },
@@ -198,6 +218,7 @@ describe('core tables', () => {
     expect(names).not.toContain('item_history')
     expect(names).not.toContain('shelf_item')
     expect(names).not.toContain('plugin_endpoint')
+    expect(names).not.toContain('audit_log')
     await ledger.destroy()
   })
 })

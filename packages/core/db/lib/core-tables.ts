@@ -153,6 +153,23 @@ export const pluginEndpointTable = defineTable('plugin_endpoint', {
   primaryKey: ['plugin_id', 'url'],
 })
 
+/**
+ * 审计日志表；kind 为 deny|invoke|error，detail 为 JSON 序列化的补充信息，
+ * id 为写入时生成的单调键（毫秒时间戳 + 序号），按 at 索引支持裁剪与倒序查询。
+ */
+export const auditLogTable = defineTable('audit_log', {
+  columns: {
+    id: textNotNull(),
+    at: textNotNull(),
+    kind: textNotNull(),
+    plugin_id: text(),
+    capability: text(),
+    detail: text(),
+  },
+  primaryKey: ['id'],
+  indexes: [{ columns: ['at'] }],
+})
+
 export const coreTables = [
   pluginStateTable,
   resourceTable,
@@ -162,6 +179,7 @@ export const coreTables = [
   itemHistoryTable,
   shelfItemTable,
   pluginEndpointTable,
+  auditLogTable,
 ] as const
 
 export type CoreDatabase = DatabaseOf<typeof coreTables>
@@ -182,6 +200,8 @@ export type ShelfItemRow = TableRow<(typeof shelfItemTable)['columns']>
 
 export type PluginEndpointRow = TableRow<(typeof pluginEndpointTable)['columns']>
 
+export type AuditLogRow = TableRow<(typeof auditLogTable)['columns']>
+
 export const CORE_MIGRATION_NAME = 'core-tables-v1'
 
 const joinStatements = (statements: readonly string[]): string =>
@@ -196,11 +216,19 @@ const resourceEraTables = [pluginStateTable, resourceTable, downloadTaskTable] a
 const compiledV2 = compileMigration(snapshotOf([pluginStateTable]), snapshotOf(resourceEraTables))
 
 // 用户域基线为资源域三表 + 用户域五表；网络域追加 plugin_endpoint。
-const userEraTables = coreTables.filter((table) => table !== pluginEndpointTable)
+const userEraTables = coreTables.filter(
+  table => table !== pluginEndpointTable && table !== auditLogTable,
+)
 
 const compiledV3 = compileMigration(snapshotOf(resourceEraTables), snapshotOf(userEraTables))
 
-const compiledV4 = compileMigration(snapshotOf(userEraTables), snapshotOf(coreTables))
+// 网络域冻结为用户域 + plugin_endpoint，保证既有库的 v4 已应用迁移文本不变。
+const networkEraTables = coreTables.filter(table => table !== auditLogTable)
+
+const compiledV4 = compileMigration(snapshotOf(userEraTables), snapshotOf(networkEraTables))
+
+// 审计域追加 audit_log。
+const compiledV5 = compileMigration(snapshotOf(networkEraTables), snapshotOf(coreTables))
 
 export const coreMigrations: readonly MigrationEntry[] = [
   {
@@ -230,5 +258,12 @@ export const coreMigrations: readonly MigrationEntry[] = [
     name: 'core-network-v1',
     up: joinStatements(compiledV4.up),
     down: joinStatements(compiledV4.down),
+  },
+  {
+    pluginId: 'core',
+    n: 5,
+    name: 'core-audit-v1',
+    up: joinStatements(compiledV5.up),
+    down: joinStatements(compiledV5.down),
   },
 ]
