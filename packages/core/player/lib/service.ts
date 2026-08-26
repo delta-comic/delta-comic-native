@@ -119,10 +119,15 @@ export class PlayerService extends Service {
    * 解析到播放器实例：递归展开 redirect 并逐跳校验；
    * 失败路径先关闭 scope 再抛 PlayerResolveError。
    */
-  async resolve<K extends PlayerKey>(
-    key: K,
-    input: PlayerInput<K>,
-  ): Promise<ResolvedPlayer> {
+  async resolve<K extends PlayerKey>(key: K, input: PlayerInput<K>): Promise<ResolvedPlayer> {
+    return this.resolveErased(key, input)
+  }
+
+  /**
+   * 类型擦除还原点：宿主与路由层持有的是运行期字符串 key 与 unknown 输入，
+   * 无法静态绑定注册表；运行期由 schema 校验与 missing 检查 fail loud 兜底。
+   */
+  async resolveErased(key: string, input: unknown): Promise<ResolvedPlayer> {
     const scope = this.createScope()
     const chain: string[] = [key]
     const visited = new Set<string>([key])
