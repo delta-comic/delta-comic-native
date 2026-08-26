@@ -123,7 +123,7 @@ const describeCause = (cause: unknown): string | undefined => {
   if (cause === undefined) return undefined
   if (cause instanceof Error) return cause.message
   try {
-    return JSON.stringify(cause) ?? String(cause)
+    return JSON.stringify(cause) ?? '[unserializable]'
   } catch {
     return '[unserializable]'
   }
