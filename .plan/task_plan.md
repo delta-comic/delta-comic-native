@@ -45,16 +45,18 @@
 - RouteRegistry + NavigationService（React Navigation v7 native-stack）+ 深链 resolver + Web URL 同步
 
 ### Phase 7: AI 调试通道（Dev MCP）
-**Status:** pending
+**Status:** complete（commit 见 progress.md）
 - 线协议 TypeBox schemas（protocol/lib/debug.ts），两端共享校验源
 - packages/plugins/debug 官方插件（`__DEV__` 门控）：服务投影/环形事件捕获/命令执行（只走既有服务公开 API）
 - scripts/dev-mcp：MCP server（stdio，官方 @modelcontextprotocol/sdk）+ 多设备 WS hub + 配对 token + 工具门控配置
 - 工具面：观察（app_info/plugin_list/plugin_detail/db_schema/db_query/logs/events_recent/registry_list/diagnostics_export）+ 操控（plugin_reload/enable/disable、navigate）
 
 ### Phase 8: Feed/Card/Waterfall
-**Status:** pending
-- FeedSurface/FeedProvider 协议、session seed 排序、部分失败重试
-- Waterfall 双列起步断点列数 2->3->4；统一 Card；ItemActionProvider 菜单
+**Status:** complete（commit 见 progress.md）
+- protocol/lib/feed.ts：Item/ItemPage/FeedProvider/FeedSurfaceDescriptor/ItemAction(Provider) 协议类型
+- packages/core/feed：seed 确定性排序纯函数；FeedSession 合并去重/seed 分值排序/cursor 独立分页/部分失败独立重试（全失败才整体 error）；FeedService（surface 注册表+会话工厂+Events 广播）；ItemActionService（applies 过滤+注册序拼接）
+- packages/ui/waterfall：columnsForWidth 断点列数 2->3->4（<768/<1280/≥1280）纯函数 + Waterfall 分列组件
+- packages/ui/card：WaterfallCard（封面/浏览量 overlay/时长徽章/作者行）+ ItemActionMenu 底部弹层
 
 ### Phase 9: Player 与资源体系
 **Status:** pending
@@ -95,4 +97,4 @@
 |-------|---------|------------|
 
 ## Next Step
-Phase 7：AI 调试通道（Dev MCP）。
+Phase 9：Player 与资源体系（player contract 运行时 + PlayerHost + resource 三件套）。

@@ -172,3 +172,26 @@ Phase 7 AI 调试通道（Dev MCP）。
 - ws RawData 消息须按 string/Buffer[]/ArrayBuffer 分支解码（no-base-to-string 强制）
 - vitest no-conditional-expect：判别联合用 toMatchObject({ok:false,issues:expect.any(Array)}) 替代 if 收窄后 expect
 - vp test 项目匹配以仓库根为基准：scripts/* 的测试放 scripts/x/script/test/ 并在根 vite.config projects 注册
+
+## Phase 8：Feed/Card/Waterfall（2026-08-26）
+
+### 提交
+- protocol：lib/feed.ts 定义 ResourceRef/ContentSourceRef/CreatorRef/Item/ItemPage/FeedProvider/FeedSurfaceDescriptor（isValidSurfaceId=isValidLayeredKey）/ItemActionContext/ItemAction/ItemActionProvider
+- core/feed：seed.ts（newSessionSeed 时间基数36进制+随机后缀、fnv1a 32位、itemRank、compareRank 降序+字典序 tiebreak）；session.ts FeedSession（entriesById 去重保留高分、slots 独立 cursor/status/error/lastLoadedAt、loadMore inflight 复用+allSettled 并发轮转、部分失败 phase ready+lastRoundPartialFailure、全失败才 error、retry 单 provider、refresh 换 seed 清空重拉、subscribe/getSnapshot 直连 useSyncExternalStore）；service.ts FeedService（registerSurface 校验 id/providers 非空/key 唯一/重复抛错 + 'feed/surface-changed' Events 广播 + surfaces 投影 + createSession 工厂）与 ItemActionService（applies 过滤注册序拼接）
+- ui-waterfall：columns.ts WATERFALL_BREAKPOINTS{medium:768,expanded:1280} columnsForWidth 2->3->4 纯函数；Waterfall ScrollView 内 index%N 分列组件（首期无虚拟化，规模前提注释）
+- ui-card：format.ts formatViewCount（万/亿一位小数去尾零）；index.tsx WaterfallCard（expo-image 封面 aspect-[3/4]、左下 👁 浏览量 overlay、右下半透明时长徽章、两行标题、作者行+⋮）与 ItemActionMenu（Modal 底部弹层）
+
+### 关键事实
+- 类字段与方法同名会运行时覆盖原型方法（FeedService surfaces 字段 vs surfaces() 方法）——tsc 报 duplicate identifier 前测试先炸 'not a function'，字段改名规避
+- 包缺 tsconfig.json 时 rolldown-plugin-dts 报 'tsgo did not generate dts file for lib/index.ts'
+- `vp run -r pack` 并行 tsgo 内存压力大易 OOM exit 137——逐包 `vp -C <pkg> run pack` 重试即可
+- tailwindcss enforces-shorthand 会级联合并：h-full w-full→size-full、px-2 py-2→p-2、h-4 w-4→size-4
+- `export { x } from './y'` 纯 re-export 不引入局部作用域，同文件使用需单独 import
+- vitest helper 暴露调用计数须 getter（`calls: state.calls` 是创建时快照恒 0）
+- 部分 provider 失败时 session phase 保持 ready（lastRoundPartialFailure=true），全失败才进入整体 error
+
+### 验证
+vp install / vp lint / vp run -r typecheck（29 任务）/ vp test（27 文件 168 passed）全部通过。
+
+### 下一步
+Phase 9 Player 与资源体系。
