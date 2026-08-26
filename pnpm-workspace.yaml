@@ -1,5 +1,6 @@
 packages:
   - packages/*/*
+  - packages/app
   - scripts/*
 
 allowBuilds:
@@ -26,6 +27,7 @@ catalog:
   react: ^19.2.8
   react-dom: ^19.2.8
   '@types/react': ^19.2.18
+  '@types/react-dom': ^19.2.3
   react-native: 0.87.0
   react-native-web: ^0.21.2
   react-native-macos: 0.81.9
@@ -43,6 +45,8 @@ catalog:
   fflate: ^0.8.3
   cac: ^7.0.0
   '@noble/hashes': ^2.3.0
+  sql.js: ^1.13.0
+  '@types/sql.js': ^1.4.11
 minimumReleaseAgeExclude:
   - '@voidzero-dev/vite-plus-core@0.3.0'
   - '@voidzero-dev/vite-plus-darwin-arm64@0.3.0'
