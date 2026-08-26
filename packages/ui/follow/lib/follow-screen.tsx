@@ -1,3 +1,17 @@
+import type {
+  Item,
+  ResourceRef,
+  SubscribableProvider,
+  SubscribableRef,
+} from '@delta-comic/protocol'
+import type {
+  SubscriptionEntity,
+  SubscriptionGroupEntity,
+  SubscribableRegistryService,
+  SubscriptionService,
+} from '@delta-comic/social'
+import { WaterfallCard } from '@delta-comic/ui-card'
+import { Waterfall } from '@delta-comic/ui-waterfall'
 /**
  * 关注页：分组 chips + 订阅卡网格 + 内嵌条目流（architecture.md §4）。
  *
@@ -5,7 +19,7 @@
  * - 订阅卡异步解析 SubscribableSummary，失败呈现占位态
  * - 点选订阅进入条目流；长按订阅取消订阅
  */
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -18,21 +32,6 @@ import {
   useWindowDimensions,
 } from 'react-native'
 import type {} from 'uniwind/types'
-
-import type {
-  Item,
-  ResourceRef,
-  SubscribableProvider,
-  SubscribableRef,
-} from '@delta-comic/protocol'
-import { WaterfallCard } from '@delta-comic/ui-card'
-import { Waterfall } from '@delta-comic/ui-waterfall'
-import type {
-  SubscriptionEntity,
-  SubscriptionGroupEntity,
-  SubscribableRegistryService,
-  SubscriptionService,
-} from '@delta-comic/social'
 
 export interface FollowScreenProps {
   readonly subscriptions: SubscriptionService
@@ -161,9 +160,7 @@ export function FollowScreen({
               onPress={() =>
                 setActive({ kind: subscription.targetKind, id: subscription.targetId })
               }
-              onUnsubscribe={() =>
-                confirmUnsubscribe(subscriptions, subscription, reload)
-              }
+              onUnsubscribe={() => confirmUnsubscribe(subscriptions, subscription, reload)}
             />
           ))}
         </ScrollView>
@@ -183,9 +180,7 @@ function confirmUnsubscribe(
       text: '确认',
       style: 'destructive',
       onPress: () => {
-        void subscriptions
-          .unsubscribe(subscription.targetKind, subscription.targetId)
-          .then(done)
+        void subscriptions.unsubscribe(subscription.targetKind, subscription.targetId).then(done)
       },
     },
   ])
@@ -221,6 +216,7 @@ function SubscriptionCard(props: {
     () => ({ kind: props.subscription.targetKind, id: props.subscription.targetId }),
     [props.subscription.targetKind, props.subscription.targetId],
   )
+  const { provider, resolvePreview } = props
   const [attempt, setAttempt] = useState<
     | { readonly ok: true; readonly title: string; readonly coverUri: string | null }
     | { readonly ok: false }
@@ -228,33 +224,32 @@ function SubscriptionCard(props: {
   >()
 
   useEffect(() => {
+    if (provider === undefined) return undefined
     let live = true
-    const provider = props.provider
-    if (provider === undefined) {
-      setAttempt({ ok: false })
-      return undefined
-    }
     provider.getSummary(target).then(
       summary => {
         if (live) {
-          setAttempt({
-            ok: true,
-            title: summary.title,
-            coverUri:
-              summary.cover === undefined
-                ? null
-                : (props.resolvePreview?.(summary.cover) ?? null),
-          })
+          const coverUri =
+            summary.cover === undefined ? null : (resolvePreview?.(summary.cover) ?? null)
+          setAttempt(previous =>
+            previous?.ok === true &&
+            previous.title === summary.title &&
+            previous.coverUri === coverUri
+              ? previous
+              : { ok: true, title: summary.title, coverUri },
+          )
         }
       },
       () => {
-        if (live) setAttempt({ ok: false })
+        if (live) {
+          setAttempt(previous => (previous?.ok === false ? previous : { ok: false }))
+        }
       },
     )
     return () => {
       live = false
     }
-  }, [target])
+  }, [target, provider, resolvePreview])
 
   return (
     <Pressable
@@ -271,12 +266,12 @@ function SubscriptionCard(props: {
             style={{ resizeMode: 'cover' }}
           />
         )}
-        {attempt === undefined && (
+        {attempt === undefined && provider !== undefined && (
           <View className='size-full items-center justify-center'>
             <ActivityIndicator />
           </View>
         )}
-        {attempt?.ok === false && (
+        {(attempt?.ok === false || provider === undefined) && (
           <View className='size-full items-center justify-center p-1'>
             <Text className='text-xs text-neutral-500'>无法获取</Text>
           </View>
@@ -299,8 +294,8 @@ function SubscriptionItemsView(props: {
   const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>('loading')
   const [items, setItems] = useState<readonly Item[]>([])
   const [hasMore, setHasMore] = useState(false)
-  const cursorRef = { current: undefined as string | undefined }
-  const loadingRef = { current: false }
+  const cursorRef = useRef<string | undefined>(undefined)
+  const loadingRef = useRef(false)
   const { width } = useWindowDimensions()
 
   const loadMore = useCallback(() => {
@@ -319,7 +314,7 @@ function SubscriptionItemsView(props: {
         loadingRef.current = false
       },
     )
-  }, [props.provider, props.target])
+  }, [props.provider, props.target, cursorRef, loadingRef])
 
   useEffect(() => {
     loadMore()
@@ -328,9 +323,7 @@ function SubscriptionItemsView(props: {
   const cards = items.map(item => (
     <WaterfallCard
       key={item.id}
-      coverUri={
-        item.preview === undefined ? null : (props.resolvePreview?.(item.preview) ?? null)
-      }
+      coverUri={item.preview === undefined ? null : (props.resolvePreview?.(item.preview) ?? null)}
       title={item.title}
       authorName={item.creatorRefs[0]?.displayName}
       viewCount={item.viewCount}
@@ -351,7 +344,7 @@ function SubscriptionItemsView(props: {
 
   return (
     <View className='size-full bg-neutral-950'>
-      <Pressable onPress={props.onBack} className='self-start px-3 py-3 active:opacity-70'>
+      <Pressable onPress={props.onBack} className='self-start p-3 active:opacity-70'>
         <Text className='text-sm text-sky-400'>‹ 返回</Text>
       </Pressable>
       {phase === 'loading' ? (
