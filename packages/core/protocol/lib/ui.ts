@@ -7,12 +7,15 @@
  */
 export interface UIRegistry {}
 
-const UI_KEY_PATTERN = /^[a-z][a-z0-9]*(?:\/[a-z][a-z0-9-]*)+$/
+const LAYERED_KEY_PATTERN = /^[a-z][a-z0-9]*(?:\/[a-z][a-z0-9-]*)+$/
+
+/** 分层 key 形态约定：至少两层，段内小写字母数字（name 段可带连字符）。 */
+export function isValidLayeredKey(key: string): boolean {
+  return LAYERED_KEY_PATTERN.test(key)
+}
 
 /** 校验分层 key：至少两层，段内小写字母数字（name 段可带连字符）。 */
-export function isValidUiKey(key: string): boolean {
-  return UI_KEY_PATTERN.test(key)
-}
+export const isValidUiKey = isValidLayeredKey
 
 export interface UIBaseRegistration<T> {
   /** 注册条目 ID，同 key 内唯一，通常为来源插件 ID。 */
