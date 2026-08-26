@@ -7,6 +7,7 @@
  *   manifest 仅携带 network.multiEdge 开关
  */
 import type { Context } from 'cordis'
+import type { ReactNode } from 'react'
 import type { Static, TSchema } from 'typebox'
 
 /** player 输入协议注册挂点：插件以 declare module 扩展本接口，key 为协议 key。 */
@@ -22,9 +23,10 @@ export type PlayerProtocolOf<K extends keyof PlayerInputRegistry> = PlayerInputR
 
 export type PlayerInput<K extends keyof PlayerInputRegistry> = Static<PlayerProtocolOf<K>['schema']>
 
-/** 解析终点的播放器实例。 */
+/** 解析终点的播放器实例：render 产出 RN UI，dispose 由宿主在卸载时调用。 */
 export interface PlayerInstance {
   readonly providerId: string
+  render(): ReactNode
   dispose?(): void | Promise<void>
 }
 

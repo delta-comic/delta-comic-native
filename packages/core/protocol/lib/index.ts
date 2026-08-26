@@ -10,6 +10,7 @@
  *
  * Phase 7 新增 Dev MCP 调试通道线协议（debug.ts），应用侧与工具侧共享校验源。
  * Phase 8 新增 Feed/Card 协议（feed.ts）：FeedSurface/FeedProvider/Item/ItemAction。
+ * Phase 9 新增资源协议（resource.ts）：ResourceDescriptor/ResourceProvider/RangeUnsupportedError。
  */
 export { protocolVersion } from './version'
 
@@ -18,3 +19,4 @@ export * from './contract'
 export * from './ui'
 export * from './debug'
 export * from './feed'
+export * from './resource'
