@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { EndpointRepository } from '../lib/repository'
+
 import { createTestDb } from './util'
 
 describe('EndpointRepository', () => {
@@ -39,7 +40,11 @@ describe('EndpointRepository', () => {
   it('recordFailure 自增计数，touch 归零并刷新触达', async () => {
     const h = await createTestDb()
     const repo = new EndpointRepository(h.db)
-    await repo.recordProbe('sample', { url: 'https://e.test', latencyMs: 50 }, '2026-08-26T00:00:00.000Z')
+    await repo.recordProbe(
+      'sample',
+      { url: 'https://e.test', latencyMs: 50 },
+      '2026-08-26T00:00:00.000Z',
+    )
 
     await repo.recordFailure('sample', 'https://e.test', '2026-08-26T00:01:00.000Z')
     await repo.recordFailure('sample', 'https://e.test', '2026-08-26T00:02:00.000Z')
@@ -58,15 +63,27 @@ describe('EndpointRepository', () => {
   it('pruneStale 清理从未成功与过期行，removeExcept 收缩集合', async () => {
     const h = await createTestDb()
     const repo = new EndpointRepository(h.db)
-    await repo.recordProbe('sample', { url: 'https://fresh.test', latencyMs: 10 }, '2026-08-26T05:00:00.000Z')
-    await repo.recordProbe('sample', { url: 'https://old.test', latencyMs: 20 }, '2026-08-25T00:00:00.000Z')
+    await repo.recordProbe(
+      'sample',
+      { url: 'https://fresh.test', latencyMs: 10 },
+      '2026-08-26T05:00:00.000Z',
+    )
+    await repo.recordProbe(
+      'sample',
+      { url: 'https://old.test', latencyMs: 20 },
+      '2026-08-25T00:00:00.000Z',
+    )
     await repo.removeExcept('sample', ['https://fresh.test', 'https://old.test'])
 
     await repo.pruneStale('sample', '2026-08-26T00:00:00.000Z')
     let urls = (await repo.listByPlugin('sample')).map(row => row.url)
     expect(urls).toEqual(['https://fresh.test'])
 
-    await repo.recordProbe('sample', { url: 'https://gone.test', latencyMs: 30 }, '2026-08-26T05:00:00.000Z')
+    await repo.recordProbe(
+      'sample',
+      { url: 'https://gone.test', latencyMs: 30 },
+      '2026-08-26T05:00:00.000Z',
+    )
     await repo.removeExcept('sample', ['https://fresh.test'])
     urls = (await repo.listByPlugin('sample')).map(row => row.url)
     expect(urls).toEqual(['https://fresh.test'])

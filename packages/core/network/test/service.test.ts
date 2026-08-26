@@ -1,12 +1,9 @@
 import type { Edge } from '@delta-comic/protocol'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import {
-  EdgeRouterService,
-  NoEdgeAvailableError,
-  type EdgeRouterSnapshot,
-} from '../lib/service'
 import type { ProbeRace, RankedEndpoint } from '../lib/probe'
+import { EdgeRouterService, NoEdgeAvailableError, type EdgeRouterSnapshot } from '../lib/service'
+
 import { createContext, createTestDb, flush, type TestDb } from './util'
 
 interface ProbeSpec {
@@ -22,16 +19,17 @@ const edge = (baseUrl: string, label?: string): Edge => ({ baseUrl, label })
 
 /** 立即出结果的确定性竞速：按声明顺序兑现，fail 项按序拒绝。 */
 function raceOf(specs: readonly ProbeSpec[]): ProbeRace {
-  const attempts = specs.map(spec =>
-    new Promise<RankedEndpoint>((resolve, reject) => {
-      const settle = () =>
-        spec.fail === true
-          ? reject(new Error(`down: ${spec.edge.baseUrl}`))
-          : resolve({ edge: spec.edge, latencyMs: spec.latencyMs })
-      const delay = spec.delay ?? 0
-      if (delay === 0) settle()
-      else setTimeout(settle, delay)
-    }),
+  const attempts = specs.map(
+    spec =>
+      new Promise<RankedEndpoint>((resolve, reject) => {
+        const settle = () =>
+          spec.fail === true
+            ? reject(new Error(`down: ${spec.edge.baseUrl}`))
+            : resolve({ edge: spec.edge, latencyMs: spec.latencyMs })
+        const delay = spec.delay ?? 0
+        if (delay === 0) settle()
+        else setTimeout(settle, delay)
+      }),
   )
   const whenFirst = Promise.any(attempts)
   // 未被消费的竞速对象（如队列中未用到的轮次）拒绝时避免全局未处理告警。
@@ -227,7 +225,10 @@ describe('EdgeRouterService', () => {
 
   it('withFailover 标记失败切次优并重调一次', async () => {
     h.races.push(
-      raceOf([{ edge: edge('https://a.test'), latencyMs: 100 }, { edge: edge('https://b.test'), latencyMs: 200 }]),
+      raceOf([
+        { edge: edge('https://a.test'), latencyMs: 100 },
+        { edge: edge('https://b.test'), latencyMs: 200 },
+      ]),
     )
     h.service.attach({
       pluginId: 'sample',

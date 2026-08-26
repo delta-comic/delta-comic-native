@@ -35,7 +35,10 @@ export class NoEdgeAvailableError extends Error {
 
   readonly code = 'no-edge-available'
 
-  constructor(readonly pluginId: string, options?: { cause?: unknown }) {
+  constructor(
+    readonly pluginId: string,
+    options?: { cause?: unknown },
+  ) {
     super(`插件无可用端点：${pluginId}`, options)
   }
 }
@@ -116,8 +119,15 @@ const edgeOf = (record: EndpointRecord): Edge => ({
   label: record.label ?? undefined,
 })
 
-const describeCause = (cause: unknown): string | undefined =>
-  cause === undefined ? undefined : cause instanceof Error ? cause.message : String(cause)
+const describeCause = (cause: unknown): string | undefined => {
+  if (cause === undefined) return undefined
+  if (cause instanceof Error) return cause.message
+  try {
+    return JSON.stringify(cause) ?? String(cause)
+  } catch {
+    return '[unserializable]'
+  }
+}
 
 export class EdgeRouterService extends Service {
   private readonly states = new Map<string, RouterState>()
@@ -341,14 +351,17 @@ export class EdgeRouterService extends Service {
         const race = this.prober(edges, { timeoutMs: PROBE_TIMEOUT_MS })
         const first = await race.whenFirst
         this.select(state, first)
-        void race.whenSettled.then(ranked => {
-          if (state.selected === null) return
-          const settled = ranked.some(entry => entry.edge.baseUrl === state.selected?.baseUrl)
-            ? ranked
-            : [{ edge: state.selected, latencyMs: first.latencyMs }, ...ranked]
-          state.ranking = [...settled]
-          void this.persistCandidates(state.pluginId, settled)
-        }, () => {})
+        void race.whenSettled.then(
+          ranked => {
+            if (state.selected === null) return
+            const settled = ranked.some(entry => entry.edge.baseUrl === state.selected?.baseUrl)
+              ? ranked
+              : [{ edge: state.selected, latencyMs: first.latencyMs }, ...ranked]
+            state.ranking = [...settled]
+            void this.persistCandidates(state.pluginId, settled)
+          },
+          () => {},
+        )
       } catch (cause) {
         this.markFailed(state, cause instanceof AggregateError ? cause.errors[0] : cause)
         return
@@ -376,11 +389,7 @@ export class EdgeRouterService extends Service {
     void this.repo
       .recordProbe(
         state.pluginId,
-        {
-          url: winner.edge.baseUrl,
-          label: winner.edge.label,
-          latencyMs: winner.latencyMs,
-        },
+        { url: winner.edge.baseUrl, label: winner.edge.label, latencyMs: winner.latencyMs },
         toIso(Date.now()),
       )
       .catch(error => {

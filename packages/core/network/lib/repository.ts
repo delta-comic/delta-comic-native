@@ -75,10 +75,7 @@ export class EndpointRepository {
   async recordFailure(pluginId: string, url: string, failedAtIso: string): Promise<void> {
     await this.db
       .updateTable('plugin_endpoint')
-      .set({
-        fail_count: sql<number>`plugin_endpoint.fail_count + 1`,
-        updated_at: failedAtIso,
-      })
+      .set({ fail_count: sql<number>`plugin_endpoint.fail_count + 1`, updated_at: failedAtIso })
       .where(eb => eb.and([eb('plugin_id', '=', pluginId), eb('url', '=', url)]))
       .execute()
   }
