@@ -68,8 +68,18 @@
 - ui-shell：RootNavigator playerScreen 槽注册 'core/player' fullScreenModal
 
 ### Phase 10: 业务插件
-**Status:** pending
-- 关注体系（subscription_group/subscription + SubscribableProvider）、搜索 SearchPage、书架、我的、历史/进度
+**Status:** complete（commit 见 progress.md）
+- protocol：lib/social.ts（SubscribableRef/Summary/Provider、SearchProvider、isSubscribableKind）+ ItemSnapshot 序列化边界（serializeItemSnapshot/parseItemSnapshot，loader 同款边界守卫）
+- db：subscription_group/subscription/item_history/shelf_item 四表 + core migration v3 'core-user-v1'（v2 资源域基线冻结）
+- packages/core/social：双 Repository + SubscriptionService（默认分组幂等/删组迁移/订阅唯一）+ SubscribableRegistryService
+- packages/core/search：SearchService（provider 注册表/委托搜索/事件广播）
+- packages/core/library：HistoryRepository/ShelfRepository + HistoryService（打开计数/进度补写/时钟注入）+ ShelfService（favorite/later 唯一）
+- ui-shell：tab 槽经 routeRegistry.resolveScreen 解析注册屏幕渲染，未注册回退 TabPlaceholder
+- packages/ui/home：surface chips + FeedSession 流水页（useSyncExternalStore 订阅快照）
+- packages/ui/follow：分组管理 + 订阅卡异步 summary 解析 + 内嵌条目流 + 长按退订
+- packages/ui/search：SearchPage（provider 单选/结果瀑布流/路由参数 query）+ openSearch
+- packages/ui/bookshelf：继续消费/最近打开/收藏/稍后/下载任务分区（partitionHistory 纯函数）
+- packages/ui/mine：设置入口/插件状态投影（八态 badge）/缓存诊断占位
 
 ### Phase 11: 平台服务
 **Status:** pending
@@ -101,4 +111,4 @@
 |-------|---------|------------|
 
 ## Next Step
-Phase 9：Player 与资源体系（player contract 运行时 + PlayerHost + resource 三件套）。
+Phase 11：平台服务（network/EdgeRouter/scheduler/storage 治理/capability 门控）。

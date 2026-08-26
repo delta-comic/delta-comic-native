@@ -66,3 +66,10 @@
 - 拓扑定案：`AI 客户端 ─stdio─ scripts/dev-mcp ─WS(loopback)─ packages/plugins/debug`；多设备并存按 appId 寻址。
 - plugin_detail 数据源现成：Cordis `ctx.registry` 可遍历 fiber 树取 PENDING/error 状态（skill 已有先例）；§5 状态机快照 + §3.3 migration ledger 均为已有基础设施的投影。
 - 安全三件套：编译期 `__DEV__` 折叠零包含 / loopback 绑定+配对 token / 操控类工具逐项配置门控+审计日志。
+
+## Phase 10 实施发现（2026-08-26）
+
+- **cordis typed events 与泛型负载**：`ctx.emit` 签名为 `emit<K extends keyof Events>(name, ...args: Parameters<Events[K]>)`——Events 属性是泛型调用签名时 Parameters 实例化到约束，泛型 K 负载无法赋值；映射类型索引的关联联合（correlated union）直接赋值同样被拒。结论：跨泛型边界广播的事件以固定形态声明（key 保留模板字面量约束、复杂 params 用 unknown 由监听侧按 key 收窄）。
+- **core 存取插件作用域实体**：Item.playerKey 是 keyof PlayerInputRegistry（仅插件可增强），core 域服务要存完整 Item 快照须经 protocol 的 ItemSnapshot（playerKey 放宽为 string）+ serialize/parse 边界函数；parse 采用 loader 同款守卫逐字段校验模式，返回 undefined 表损坏。
+- **UI 页面包最小骨架**：package.json exports（types→dist/index.d.ts、default→lib/index.tsx）+ tsconfig（extends base、include lib/test）+ vite.config.ts pack entry ['lib/index.tsx']；缺 vite.config.ts 时 vp pack 找不到 src/index.ts 报 'No input files'。
+- **oxlint react 规则与 RN 差异**：unbound-method 要求类方法经箭头包装传值；exhaustive-deps 接受解构局部别名；effect 内同步 setState 违规改渲染期 useMemo 派生或请求标识内嵌 state；普通对象当 ref 被禁须 useRef；RN Image 用 resizeMode style（contentFit 属 expo-image）。

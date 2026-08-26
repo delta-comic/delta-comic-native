@@ -222,3 +222,39 @@ vp install / vp lint（0 error）/ vp fmt / vp test（33 文件 204 passed）/ v
 
 ### 下一步
 Phase 10 业务插件。
+
+## Phase 10：业务插件（2026-08-26）
+
+### 提交
+- a05835f feat(protocol)：lib/social.ts（SubscribableRef/SubscribableSummary/SubscribableProvider{kind,getSummary,getItems}、SearchProvider{id,label?,search}、isSubscribableKind kebab 正则、isValidSearchProviderId=isValidLayeredKey）
+- e338eb5 feat(db)：subscription_group/subscription（unique target_kind+target_id）/item_history/shelf_item（unique kind+item_id）四表；v2 资源域基线冻结 resourceEraTables，新增 n=3 'core-user-v1'；导出四个 Row 类型
+- c585e01 feat(social)：SubscriptionGroupRepository/SubscriptionRepository + SubscriptionService('subscriptions')——默认组 id 'default' 懒创建幂等、createGroup maxSortKey+1、removeGroup 默认组抛错且订阅逐个迁入默认组、subscribe findByTarget 去重/目标组校验、变更广播 'social/subscriptions-changed'；SubscribableRegistryService('subscribables') kind 唯一注册返回 Disposable
+- e518313 + 06c571b feat(search)：SearchService('search')——provider 注册（isValidSearchProviderId 校验/dup 抛错）、providers() 同步投影、search 委托（query trim 非空）、'search/providers-changed' 广播
+- e92c379 feat(protocol)：ItemSnapshot{...playerKey:string}（Item 结构性可赋值）+ serializeItemSnapshot/parseItemSnapshot（isRecordLike 等守卫逐字段校验，可选字段条件展开规避 exactOptionalPropertyTypes）
+- 7a9a3b0 feat(library)：HistoryRepository（upsert onConflict item_id）+ ShelfRepository + HistoryService('history',options?{now}) recordOpen 打开计数/进度补写 ratio∈[0,1] 校验/list last_opened_at desc/clear；ShelfService('shelf') snowflake id/favorite|later 唯一/'library/history-changed'+'library/shelf-changed'
+- 91b5703 chore(core)：social/search/library 补 vite.config.ts pack 配置（pack 默认找 src/index.ts 报 No input files，包必须有 vite.config.ts entry lib/index.ts）
+- 91cf360 feat(ui-shell)：TabsHost tab 内容经 routeRegistry.resolveScreen(key) 解析渲染 createElement(screen,{params:{}})，未注册回退 TabPlaceholder
+- 87789d8 + a823329 feat(ui-home)：HomeScreen surface chips 横滑切换 + FeedSession useSyncExternalStore 订阅快照（session?.subscribe 须箭头包装避免 unbound-method）+ WaterfallCard 流水 + 加载更多/重试/空态
+- beed729 + bee3f6f feat(ui-follow)：分组 chips（全部/各组/＋新建内联输入）+ 订阅卡网格异步 getSummary 解析（setAttempt 同引用短路防 resolvePreview 内联箭头无限循环）+ 点选内嵌 provider.getItems 分页流 + 长按 Alert.confirm 退订
+- e14aaeb feat(ui-search)：SearchScreen provider 单选 + 结果区 key=query|token|providerId 重挂载分页视图 + SEARCH_ROUTE_KEY='core/search'/Routes.search{query?}/openSearch
+- 814a880 feat(ui-bookshelf)：partitionHistory 纯函数（continuing=有 progressRatio/recent）+ 四分区 EntrySection + DownloadSection（DownloadSnapshot 状态标签/formatBytes）+ 长按移除
+- 622266f feat(ui-mine)：MineScreen loader.diagnostics() 渲染期 useMemo 投影（effect 内同步 setState 违规）八态 badge + ActionRow 设置/缓存/诊断占位
+- aab0638 test(loader)：update.test.ts ledgerIds 补 'core/3'
+- 3542592 fix(navigation)：导航事件负载改为固定形态声明——cordis emit 用 Parameters<Events[K]>，泛型方法签名与泛型 K 负载均无法通过；NavigateEvent 改 {key:`${string}/${string}`,params:unknown}
+- bf8136f style：统一 vp fmt 输出并同步 pnpm-lock
+
+### 关键事实（新增）
+- cordis Events 声明不支持泛型调用签名（emit 参数走 Parameters<> 实例化到约束）；跨泛型边界广播事件时事件负载须以固定形态声明（模板字符串保留 key 约束、params unknown 由监听侧收窄）
+- 包内无 PlayerInputRegistry 增强时 keyof 为 never：构造 Item 字面量的测试需本地 declare module '@delta-comic/protocol' 增强 + typebox Type.Object
+- serializeItemSnapshot 参数类型应为 ItemSnapshot（用 Item 会令 library 侧 playerKey 收窄成 never）
+- 新 UI 页面包模板：package.json exports types→dist/index.d.ts default→lib/index.tsx + tsconfig extends base include lib,test + vite.config.ts pack entry ['lib/index.tsx']
+- oxlint React 规则集：unbound-method（箭头包装类方法）、exhaustive-deps（解构局部别名入 deps）、set-state-in-effect（渲染期 useMemo/state 内嵌请求标识替代）、immutability（useRef 替代普通对象 ref）、enforces-shorthand（size-*/p-* 合并）
+- RN Image 无 contentFit prop（expo-image 专属），用 style resizeMode
+- HistoryEntry|ShelfEntry 联合属性访问须 'xxx' in entry 窄化
+- vp fmt 会重排 import/tailwind class 并调整换行宽度——edit oldString 应先读文件匹配 fmt 后内容；package.json 缺尾换行不会被 fmt 修正需手动补
+
+### 验证
+vp lint（0 error）/ vp fmt / vp test（36 文件 236 passed）/ vp run -r typecheck（51 任务全绿）。
+
+### 下一步
+Phase 11 平台服务。
