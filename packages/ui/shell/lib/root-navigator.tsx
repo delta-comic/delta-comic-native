@@ -153,7 +153,17 @@ function TabsHost(props: {
     >
       {props.tabKeys.map(key => (
         <Tabs.Screen key={key} name={key}>
-          {() => <TabPlaceholder title={tabLabel(key, props.tabLabels)} />}
+          {() => {
+            const screen = props.ctx.routeRegistry.resolveScreen(key)
+            if (screen === undefined) {
+              return <TabPlaceholder title={tabLabel(key, props.tabLabels)} />
+            }
+            return createElement(screen, {
+              // 存在类型还原点：tab 根路由参数恒为空对象且受 Routes 约束，
+              // 导航容器运行时回读宽类型，此处对齐注册表静态绑定的参数联合。
+              params: {} as Routes[keyof Routes],
+            })
+          }}
         </Tabs.Screen>
       ))}
     </Tabs.Navigator>
