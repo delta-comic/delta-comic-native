@@ -46,6 +46,86 @@ export interface Item {
   readonly updatedAt: number
 }
 
+/**
+ * Item 快照：playerKey 放宽为 string 的存储形态。
+ * 历史 / 书架等本地域持久化完整 Item 时使用；
+ * Item 结构性可赋给 ItemSnapshot，序列化边界集中在 serializeItemSnapshot / parseItemSnapshot。
+ */
+export interface ItemSnapshot {
+  readonly id: string
+  readonly title: string
+  readonly preview?: ResourceRef
+  readonly playerKey: string
+  readonly sourceRefs: readonly ContentSourceRef[]
+  readonly creatorRefs: readonly CreatorRef[]
+  readonly viewCount?: number
+  readonly createdAt: number
+  readonly updatedAt: number
+}
+
+const isRecordLike = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const isResourceRef = (value: unknown): value is ResourceRef =>
+  isRecordLike(value) && typeof value.kind === 'string' && typeof value.ref === 'string'
+
+const isContentSourceRef = (value: unknown): value is ContentSourceRef =>
+  isRecordLike(value) && typeof value.sourceId === 'string' && typeof value.externalId === 'string'
+
+const isCreatorRef = (value: unknown): value is CreatorRef =>
+  isRecordLike(value) &&
+  typeof value.creatorId === 'string' &&
+  typeof value.displayName === 'string' &&
+  (value.avatar === undefined || isResourceRef(value.avatar))
+
+/**
+ * Item -> 快照 JSON。写入方持有完整类型信息，此处仅做结构透传。
+ */
+export const serializeItemSnapshot = (item: Item): string => {
+  const snapshot: ItemSnapshot = item
+  return JSON.stringify(snapshot)
+}
+
+/**
+ * 快照 JSON -> ItemSnapshot；payload 由 serializeItemSnapshot 写入，
+ * 字段级校验失败返回 undefined（存储边界容错）。
+ */
+export const parseItemSnapshot = (payloadJson: string): ItemSnapshot | undefined => {
+  let value: unknown
+  try {
+    value = JSON.parse(payloadJson)
+  } catch {
+    return undefined
+  }
+  if (!isRecordLike(value)) return undefined
+  const { id, title, preview, playerKey, sourceRefs, creatorRefs, viewCount, createdAt, updatedAt } =
+    value
+  if (
+    typeof id !== 'string' ||
+    typeof title !== 'string' ||
+    typeof playerKey !== 'string' ||
+    typeof createdAt !== 'number' ||
+    typeof updatedAt !== 'number'
+  ) {
+    return undefined
+  }
+  if (!Array.isArray(sourceRefs) || !sourceRefs.every(isContentSourceRef)) return undefined
+  if (!Array.isArray(creatorRefs) || !creatorRefs.every(isCreatorRef)) return undefined
+  if (preview !== undefined && !isResourceRef(preview)) return undefined
+  if (viewCount !== undefined && typeof viewCount !== 'number') return undefined
+  return {
+    id,
+    title,
+    ...(preview === undefined ? {} : { preview }),
+    playerKey,
+    sourceRefs,
+    creatorRefs,
+    ...(viewCount === undefined ? {} : { viewCount }),
+    createdAt,
+    updatedAt,
+  }
+}
+
 /** 单次取页结果：hasMore=false 时 cursor 应省略。 */
 export interface ItemPage {
   readonly items: readonly Item[]
