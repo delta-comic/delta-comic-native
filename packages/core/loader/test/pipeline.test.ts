@@ -101,7 +101,7 @@ function statesOf(events: readonly PluginRecord[], id: string): string[] {
 }
 
 function ledgerIds(rows: readonly AppliedMigration[]): string[] {
-  return rows.map(row => row.pluginId)
+  return [...new Set(rows.map(row => row.pluginId))]
 }
 
 describe('插件启动管线', () => {

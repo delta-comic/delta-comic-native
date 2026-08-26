@@ -136,6 +136,7 @@ describe('插件更新回滚', () => {
     expect(v2Entries).toBe(1)
     expect((await readLedger(h.db)).map(row => `${row.pluginId}/${row.n}`)).toEqual([
       'core/1',
+      'core/2',
       'base/1',
       'base/2',
     ])
