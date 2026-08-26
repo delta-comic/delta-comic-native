@@ -40,6 +40,8 @@ catalog:
   '@modelcontextprotocol/server': ^2.0.0
   ws: ^8.18.0
   '@types/ws': ^8.18.1
+  fflate: ^0.8.3
+  cac: ^7.0.0
 minimumReleaseAgeExclude:
   - '@voidzero-dev/vite-plus-core@0.3.0'
   - '@voidzero-dev/vite-plus-darwin-arm64@0.3.0'

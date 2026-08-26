@@ -5,8 +5,8 @@
  * - 订阅归属与分组为本地用户域数据，由核心层持久化
  * - 内容流统一返回 ItemPage，与 Feed/Search 共享 Item -> Card 渲染链
  */
-import type { ItemPage, ResourceRef } from './feed'
-import { isValidLayeredKey } from './ui'
+import type { ItemPage, ResourceRef } from './feed.ts'
+import { isValidLayeredKey } from './ui.ts'
 
 /** Subscribable 实体引用：kind 全局唯一标识实体类别，id 由 provider 自决。 */
 export interface SubscribableRef {

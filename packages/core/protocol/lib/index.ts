@@ -13,12 +13,12 @@
  * Phase 9 新增资源协议（resource.ts）：ResourceDescriptor/ResourceProvider/RangeUnsupportedError。
  * Phase 10 新增关注/搜索开放体系协议（social.ts）：SubscribableProvider/SearchProvider。
  */
-export { protocolVersion } from './version'
+export { protocolVersion } from './version.ts'
 
-export * from './manifest'
-export * from './contract'
-export * from './ui'
-export * from './debug'
-export * from './feed'
-export * from './resource'
-export * from './social'
+export * from './manifest.ts'
+export * from './contract.ts'
+export * from './ui.ts'
+export * from './debug.ts'
+export * from './feed.ts'
+export * from './resource.ts'
+export * from './social.ts'

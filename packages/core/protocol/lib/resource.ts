@@ -5,7 +5,7 @@
  * - resolve 将 ref 归一化为 ResourceDescriptor（尺寸/校验和/MIME 可选）
  * - open 返回字节流 AsyncIterable，支持 signal 中断与 offset 续传起点
  */
-import type { ResourceRef } from './feed'
+import type { ResourceRef } from './feed.ts'
 
 /** 归一化资源描述：在 ResourceRef 之上补充元信息，全部字段可选由 provider 自决。 */
 export interface ResourceDescriptor extends ResourceRef {

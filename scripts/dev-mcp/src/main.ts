@@ -2,15 +2,20 @@ import { appendFileSync } from 'node:fs'
 import process from 'node:process'
 
 import { serveStdio } from '@modelcontextprotocol/server/stdio'
+import { cac } from 'cac'
 
-import { loadConfig } from './config'
-import { DeviceHub } from './hub'
-import { createDevMcpServer } from './mcp'
-import { buildTools, type AuditEntry } from './tools'
+import { loadConfig } from './config.ts'
+import { DeviceHub } from './hub.ts'
+import { createDevMcpServer } from './mcp.ts'
+import { buildTools, type AuditEntry } from './tools.ts'
 
-function argOf(flag: string): string | undefined {
-  const index = process.argv.indexOf(flag)
-  return index >= 0 ? process.argv[index + 1] : undefined
+const cli = cac('ddm')
+cli.option('--config <path>', '配置文件路径')
+cli.option('--audit <path>', '审计日志路径（默认 .delta-dev-mcp.audit.jsonl）')
+cli.help()
+
+function strOption(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined
 }
 
 function appendAudit(path: string, entry: AuditEntry): void {
@@ -18,8 +23,15 @@ function appendAudit(path: string, entry: AuditEntry): void {
 }
 
 async function main(): Promise<void> {
-  const config = loadConfig(argOf('--config'))
-  const auditPath = argOf('--audit') ?? '.delta-dev-mcp.audit.jsonl'
+  try {
+    cli.parse(process.argv, { run: false })
+  } catch (error) {
+    console.error('[dev-mcp] 参数错误：', error instanceof Error ? error.message : error)
+    process.exitCode = 1
+    return
+  }
+  const config = loadConfig(strOption(cli.options.config))
+  const auditPath = strOption(cli.options.audit) ?? '.delta-dev-mcp.audit.jsonl'
   const hub = new DeviceHub()
   const port = await hub.start({ port: config.port, token: config.token })
   const tools = buildTools({

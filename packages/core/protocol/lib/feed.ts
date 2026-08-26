@@ -6,8 +6,8 @@
  * - Item 为 Feed/Search/Subscribe 内容流统一形态，playerKey 关联 PlayerInputRegistry
  * - 菜单经 ItemActionProvider 注册，顺序 = 返回顺序，icon 视觉归 Card
  */
-import type { PlayerInputRegistry } from './contract'
-import { isValidLayeredKey } from './ui'
+import type { PlayerInputRegistry } from './contract.ts'
+import { isValidLayeredKey } from './ui.ts'
 
 export type PlayerKey = keyof PlayerInputRegistry
 

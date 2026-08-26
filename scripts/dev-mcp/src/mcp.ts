@@ -1,7 +1,7 @@
 import { fromJsonSchema, McpServer, type JsonSchemaType } from '@modelcontextprotocol/server'
 import type { TSchema } from 'typebox'
 
-import type { McpToolDef } from './tools'
+import type { McpToolDef } from './tools.ts'
 
 /**
  * TypeBox schema 与 SDK JsonSchemaType 是两套类型系统的同一 JSON Schema 形状，

@@ -1,7 +1,7 @@
 import { DEBUG_TOOLS } from '@delta-comic/protocol'
 import type { TSchema } from 'typebox'
 
-import type { ControlAllow } from './config'
+import type { ControlAllow } from './config.ts'
 
 export interface AuditEntry {
   ts: string
