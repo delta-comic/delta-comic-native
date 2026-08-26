@@ -137,6 +137,9 @@ catalogs:
     expo-image:
       specifier: ^57.0.3
       version: 57.0.3
+    ky:
+      specifier: ^2.0.2
+      version: 2.0.2
     kysely:
       specifier: ^0.29.5
       version: 0.29.5
@@ -316,6 +319,34 @@ importers:
       '@types/semver':
         specifier: 'catalog:'
         version: 7.8.0
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
+
+  packages/core/network:
+    dependencies:
+      '@delta-comic/db':
+        specifier: workspace:*
+        version: link:../db
+      '@delta-comic/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      cordis:
+        specifier: 'catalog:'
+        version: 4.0.0-rc.8
+      ky:
+        specifier: 'catalog:'
+        version: 2.0.2
+      kysely:
+        specifier: 'catalog:'
+        version: 0.29.5
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -4079,6 +4110,10 @@ packages:
   kleur@3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
+
+  ky@2.0.2:
+    resolution: {integrity: sha512-/GmXpo9F9W+f8n4Ivr2iH+7h7wL7jLbLKWkMlpflcCRb6kGjBfTlASEXaZ9qUgNTn4VgS0P2pwxxzQ4EM6Ulgg==}
+    engines: {node: '>=22'}
 
   kysely@0.29.5:
     resolution: {integrity: sha512-ooa+eSbBNPTo3MycPEuW5jdrxQdQwdtB3LC3h43FiXQbIry5tR0C5lDG7eealK0E4D7XjrnOP5DIUg/LyjRMYQ==}
@@ -8815,6 +8850,8 @@ snapshots:
       json-buffer: 3.0.1
 
   kleur@3.0.3: {}
+
+  ky@2.0.2: {}
 
   kysely@0.29.5: {}
 
