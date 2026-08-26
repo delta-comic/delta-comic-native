@@ -113,6 +113,9 @@ catalogs:
     '@modelcontextprotocol/server':
       specifier: ^2.0.0
       version: 2.0.0
+    '@noble/hashes':
+      specifier: ^2.3.0
+      version: 2.3.0
     '@react-navigation/bottom-tabs':
       specifier: ^7.4.0
       version: 7.18.17
@@ -477,6 +480,37 @@ importers:
       kysely:
         specifier: 'catalog:'
         version: 0.29.5
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@26.2.0)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.10)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(typescript@7.0.2)(yaml@2.9.0))(happy-dom@20.11.2)
+
+  packages/core/runtime:
+    dependencies:
+      '@delta-comic/db':
+        specifier: workspace:*
+        version: link:../db
+      '@delta-comic/loader':
+        specifier: workspace:*
+        version: link:../loader
+      '@delta-comic/protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@noble/hashes':
+        specifier: 'catalog:'
+        version: 2.3.0
+      cordis:
+        specifier: 'catalog:'
+        version: 4.0.0-rc.8
+      fflate:
+        specifier: 'catalog:'
+        version: 0.8.3
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2132,6 +2166,10 @@ packages:
   '@modelcontextprotocol/server@2.0.0':
     resolution: {integrity: sha512-YhHWdHfpFMQfd0prsEnxKeS3Qz3ytIGmsS0sth4KDjnacIT7hxk6hXHkJ9KysxlkvTM+WZAtQbbcUhdoP4Hvtw==}
     engines: {node: '>=20'}
+
+  '@noble/hashes@2.3.0':
+    resolution: {integrity: sha512-oN+QwyX7VSHotibwubG3kpzbwKrfnyR6OOO+3Nk/53ADL7FmgHHz4TgrbaYKvvOw09u6QTx0oiH1cNCIOuN0CQ==}
+    engines: {node: '>= 20.19.0'}
 
   '@oxc-project/runtime@0.146.0':
     resolution: {integrity: sha512-lbXHIpZ1MmK6zuw5txlMdIZ2waLVUIU5Gnm3sEuwJOiqDfQfbtjeHscatmeBoxbv8+If9LFM6PGh/3DcDWYIYw==}
@@ -6983,6 +7021,8 @@ snapshots:
     dependencies:
       '@modelcontextprotocol/core': 2.0.0
       zod: 4.4.3
+
+  '@noble/hashes@2.3.0': {}
 
   '@oxc-project/runtime@0.146.0': {}
 

@@ -1,0 +1,29 @@
+{
+  "name": "@delta-comic/runtime",
+  "version": "1.0.0",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./lib/index.ts"
+    }
+  },
+  "scripts": {
+    "pack": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@delta-comic/db": "workspace:*",
+    "@delta-comic/loader": "workspace:*",
+    "@delta-comic/protocol": "workspace:*",
+    "@noble/hashes": "catalog:",
+    "cordis": "catalog:",
+    "fflate": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
