@@ -31,12 +31,19 @@ export interface PlayerInstance {
 }
 
 /**
- * 单次解析结果：返回实例，或重定向到另一协议 key 并给出转换后的输入。
- * 重定向链由宿主递归解析并校验循环与最大深度。
+ * 单次解析结果：返回实例，或重定向到任一已注册协议并给出转换后的输入。
+ * 重定向链由宿主递归解析并校验循环与最大深度；
+ * 目标 key 与输入的对应关系由映射联合在编译期逐项配对。
  */
-export type PlayerResolveResult<K extends keyof PlayerInputRegistry> =
+export type PlayerResolveResult =
   | { readonly kind: 'instance'; readonly instance: PlayerInstance }
-  | { readonly kind: 'redirect'; readonly key: K; readonly input: PlayerInput<K> }
+  | {
+      [T in keyof PlayerInputRegistry]: {
+        readonly kind: 'redirect'
+        readonly key: T
+        readonly input: PlayerInput<T>
+      }
+    }[keyof PlayerInputRegistry]
 
 export interface Edge {
   /** 端点基准 URL，以 / 结尾与否由实现归一化。 */
