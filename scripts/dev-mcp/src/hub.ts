@@ -23,12 +23,12 @@ export interface HubOptions {
 
 /** 应用侧返回的错误帧。 */
 export class ToolCallError extends Error {
-  constructor(
-    readonly code: string,
-    message: string,
-  ) {
+  readonly code: string
+
+  constructor(code: string, message: string) {
     super(message)
     this.name = 'ToolCallError'
+    this.code = code
   }
 }
 

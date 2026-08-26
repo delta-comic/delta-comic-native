@@ -1,0 +1,25 @@
+{
+  "name": "@delta-comic/dev",
+  "version": "1.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "bin": {
+    "dcd": "./src/main.ts"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/main.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@delta-comic/dev-mcp": "workspace:*",
+    "@modelcontextprotocol/server": "catalog:",
+    "cac": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}
