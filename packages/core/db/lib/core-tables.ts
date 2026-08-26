@@ -13,6 +13,9 @@
  * - subscription：订阅归属，(target_kind, target_id) 唯一
  * - item_history：打开历史与进度，payload_json 存 Item 快照
  * - shelf_item：书架收藏/稍后条目，(kind, item_id) 唯一
+ *
+ * Phase 11 新增网络域一表（migration v4）：
+ * - plugin_endpoint：EdgeRouter 端点探测状态，冷启动 TTL 内免探复用
  */
 import {
   defineTable,
@@ -133,6 +136,23 @@ export const shelfItemTable = defineTable('shelf_item', {
   indexes: [{ columns: ['kind', 'item_id'], unique: true }],
 })
 
+/**
+ * 插件端点探测状态表；latency_ms/last_ok_at 可空表示尚未成功过，
+ * fail_count 驱动退避重探，label 保留候选展示名。
+ */
+export const pluginEndpointTable = defineTable('plugin_endpoint', {
+  columns: {
+    plugin_id: textNotNull(),
+    url: textNotNull(),
+    label: text(),
+    latency_ms: integer(),
+    last_ok_at: text(),
+    fail_count: integerNotNull(),
+    updated_at: textNotNull(),
+  },
+  primaryKey: ['plugin_id', 'url'],
+})
+
 export const coreTables = [
   pluginStateTable,
   resourceTable,
@@ -141,6 +161,7 @@ export const coreTables = [
   subscriptionTable,
   itemHistoryTable,
   shelfItemTable,
+  pluginEndpointTable,
 ] as const
 
 export type CoreDatabase = DatabaseOf<typeof coreTables>
@@ -159,6 +180,8 @@ export type ItemHistoryRow = TableRow<(typeof itemHistoryTable)['columns']>
 
 export type ShelfItemRow = TableRow<(typeof shelfItemTable)['columns']>
 
+export type PluginEndpointRow = TableRow<(typeof pluginEndpointTable)['columns']>
+
 export const CORE_MIGRATION_NAME = 'core-tables-v1'
 
 const joinStatements = (statements: readonly string[]): string =>
@@ -172,7 +195,12 @@ const resourceEraTables = [pluginStateTable, resourceTable, downloadTaskTable] a
 
 const compiledV2 = compileMigration(snapshotOf([pluginStateTable]), snapshotOf(resourceEraTables))
 
-const compiledV3 = compileMigration(snapshotOf(resourceEraTables), snapshotOf(coreTables))
+// 用户域基线为资源域三表 + 用户域五表；网络域追加 plugin_endpoint。
+const userEraTables = coreTables.filter((table) => table !== pluginEndpointTable)
+
+const compiledV3 = compileMigration(snapshotOf(resourceEraTables), snapshotOf(userEraTables))
+
+const compiledV4 = compileMigration(snapshotOf(userEraTables), snapshotOf(coreTables))
 
 export const coreMigrations: readonly MigrationEntry[] = [
   {
@@ -195,5 +223,12 @@ export const coreMigrations: readonly MigrationEntry[] = [
     name: 'core-user-v1',
     up: joinStatements(compiledV3.up),
     down: joinStatements(compiledV3.down),
+  },
+  {
+    pluginId: 'core',
+    n: 4,
+    name: 'core-network-v1',
+    up: joinStatements(compiledV4.up),
+    down: joinStatements(compiledV4.down),
   },
 ]

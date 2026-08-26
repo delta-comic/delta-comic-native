@@ -7,6 +7,7 @@ import {
   coreMigrations,
   downloadTaskTable,
   itemHistoryTable,
+  pluginEndpointTable,
   pluginStateTable,
   resourceTable,
   shelfItemTable,
@@ -24,16 +25,19 @@ describe('core tables', () => {
     const ledger = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
 
     const applied = await applyMigrations(ledger, [...coreMigrations])
-    expect(applied).toHaveLength(3)
+    expect(applied).toHaveLength(4)
     expect(applied[0]).toMatchObject({ pluginId: 'core', n: 1 })
     expect(applied[1]).toMatchObject({ pluginId: 'core', n: 2, name: 'core-resource-v1' })
     expect(applied[2]).toMatchObject({ pluginId: 'core', n: 3, name: 'core-user-v1' })
+    expect(applied[3]).toMatchObject({ pluginId: 'core', n: 4, name: 'core-network-v1' })
     // v1 基座冻结：不涉及资源域两表。
     expect(coreMigrations[0]?.up).not.toContain('resource')
     expect(coreMigrations[0]?.up).not.toContain('download_task')
     // v2 冻结在资源域：不涉及用户域四表。
     expect(coreMigrations[1]?.up).not.toContain('subscription_group')
     expect(coreMigrations[1]?.up).not.toContain('item_history')
+    // v3 冻结在用户域：不涉及网络域端点表。
+    expect(coreMigrations[2]?.up).not.toContain('plugin_endpoint')
 
     const row = {
       plugin_id: 'sample',
@@ -130,24 +134,58 @@ describe('core tables', () => {
     const shelf = await db.selectFrom(shelfItemTable.name).selectAll().execute()
     expect(shelf).toHaveLength(1)
 
+    await db
+      .insertInto(pluginEndpointTable.name)
+      .values({
+        plugin_id: 'sample',
+        url: 'https://edge-a.example.test',
+        label: 'Edge A',
+        latency_ms: 120,
+        last_ok_at: now,
+        fail_count: 0,
+        updated_at: now,
+      })
+      .execute()
+    await db
+      .insertInto(pluginEndpointTable.name)
+      .values({
+        plugin_id: 'sample',
+        url: 'https://edge-b.example.test',
+        label: null,
+        latency_ms: null,
+        last_ok_at: null,
+        fail_count: 2,
+        updated_at: now,
+      })
+      .execute()
+    const endpoints = await db
+      .selectFrom(pluginEndpointTable.name)
+      .selectAll()
+      .orderBy('url')
+      .execute()
+    expect(endpoints).toHaveLength(2)
+    expect(endpoints[0]).toMatchObject({ url: 'https://edge-a.example.test', latency_ms: 120 })
+    expect(endpoints[1]).toMatchObject({ url: 'https://edge-b.example.test', latency_ms: null })
+
     await sql`DROP TABLE ${sql.table('plugin_state')}`.execute(db)
     await db.destroy()
     await ledger.destroy()
   })
 
-  it('coreMigrations 的 down 可回滚资源域两表并保留基线', async () => {
+  it('coreMigrations 的 down 可回滚增量表并保留基线', async () => {
     const sqlite = new DatabaseSync(':memory:')
     const ledger = new Kysely({ dialect: nodeSqliteDialectFrom(sqlite) })
     await applyMigrations(ledger, [...coreMigrations])
     const { rollbackMigrations } = await import('../lib/migrator')
     const undone = await rollbackMigrations(ledger, [...coreMigrations])
     expect(undone).toEqual([
+      { pluginId: 'core', n: 4, name: 'core-network-v1' },
       { pluginId: 'core', n: 3, name: 'core-user-v1' },
       { pluginId: 'core', n: 2, name: 'core-resource-v1' },
       { pluginId: 'core', n: 1, name: 'core-tables-v1' },
     ])
     expect(await readLedger(ledger)).toEqual([])
-    // v3 的 down 删除用户域四表；v2 的 down 删除资源域两表；v1 基线的 down 为空：清账并保留基础表结构。
+    // v4 的 down 删除 plugin_endpoint；v3 的 down 删除用户域四表；v2 的 down 删除资源域两表；v1 基线的 down 为空：清账并保留基础表结构。
     const { rows } = await sql<{
       name: string
     }>`SELECT name FROM sqlite_master WHERE type = 'table'`.execute(ledger)
@@ -159,6 +197,7 @@ describe('core tables', () => {
     expect(names).not.toContain('subscription')
     expect(names).not.toContain('item_history')
     expect(names).not.toContain('shelf_item')
+    expect(names).not.toContain('plugin_endpoint')
     await ledger.destroy()
   })
 })

@@ -56,7 +56,11 @@ export type ResolveEdgesHook = (ctx: Context) => Promise<Edge[]>
 
 declare module 'cordis' {
   interface Events {
-    /** EdgeRouter 选中端点变更广播；全灭时为 null。 @mode emit */
-    'protocol/edge-changed'(edge: Edge | null): void
+    /**
+     * EdgeRouter 选中端点变更广播；每个启用 multiEdge 的插件独立一份，
+     * 负载固定形态以跨越事件边界。全灭时 edge 为 null。
+     * @mode emit
+     */
+    'protocol/edge-changed'(payload: { readonly pluginId: string; readonly edge: Edge | null }): void
   }
 }

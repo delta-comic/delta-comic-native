@@ -138,6 +138,7 @@ describe('插件更新回滚', () => {
       'core/1',
       'core/2',
       'core/3',
+      'core/4',
       'base/1',
       'base/2',
     ])
