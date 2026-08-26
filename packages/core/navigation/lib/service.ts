@@ -89,9 +89,15 @@ export interface NavigationCommands {
   readonly canGoBack: () => boolean
 }
 
-export interface NavigateEvent<K extends keyof Routes = keyof Routes> {
-  readonly key: `${string}/${K}`
-  readonly params: Routes[K]
+/**
+ * 导航事件负载：广播发生在泛型导航入口内部，事件签名以固定形态声明，
+ * key 段保留模板约束，params 交由监听侧按 key 收窄。
+ */
+export interface NavigateEvent {
+  /** 完整路由 key（plugin-id/route-name）。 */
+  readonly key: `${string}/${string}`
+  /** 与 key 关联的路由参数。 */
+  readonly params: unknown
 }
 
 export class NavigationService extends Service {
@@ -133,7 +139,11 @@ export class NavigationService extends Service {
 
 declare module 'cordis' {
   interface Events {
-    /** 导航命令成功下发后广播。 @mode emit */
+    /**
+     * 导航命令成功下发后广播。
+     *
+     * @mode emit
+     */
     'navigation/navigate'(event: NavigateEvent): void
   }
   interface Context {
