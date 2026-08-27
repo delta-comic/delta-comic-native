@@ -128,6 +128,9 @@ export function createDebugPlugin(ctx: Context, options: DebugPluginOptions): Di
   return () => bridge.stop()
 }
 
+/** namespace 插件依赖声明：宿主核心服务。 */
+export const inject = ['database', 'pluginLoader', 'routeRegistry', 'uiRegistry', 'navigation']
+
 export function apply(ctx: Context): void {
   if (!isDevMode()) return
   ctx.effect(() => {
