@@ -50,11 +50,44 @@ export interface DebugPluginOptions {
   readonly socketFactory?: WebSocketFactory
 }
 
-/** __DEV__ 判定：宿主注入的 globalThis.__DEV__ 优先，缺省回退 NODE_ENV。 */
+/** __DEV__ 判定：宿主注入的 globalThis.__DEV__ 优先，缺省回退 NODE_ENV（守卫缺失进程）。 */
 export function isDevMode(): boolean {
   const flag = (globalThis as Partial<Record<'__DEV__', unknown>>).__DEV__
   if (typeof flag === 'boolean') return flag
-  return process.env.NODE_ENV !== 'production'
+  return typeof process !== 'undefined' && process.env.NODE_ENV !== 'production'
+}
+
+/** 开发期配置全局：宿主（Web/native 桥）设置，替代进程环境变量。 */
+export interface DeltaDevConfig {
+  readonly mcpUrl?: string
+  readonly appId?: string
+  readonly platform?: string
+  readonly appVersion?: string
+  readonly hostVersion?: string
+}
+
+export function devConfig(): DeltaDevConfig {
+  const injected = (globalThis as Partial<Record<'__DELTA_DEV__', DeltaDevConfig | undefined>>)
+    .__DELTA_DEV__
+  const env =
+    typeof process === 'undefined'
+      ? undefined
+      : {
+          mcpUrl: process.env.DC_DEV_MCP_URL,
+          appId: process.env.DC_DEV_APP_ID,
+          platform: process.env.DC_DEV_PLATFORM,
+          appVersion: process.env.DC_DEV_APP_VERSION,
+          hostVersion: process.env.DC_DEV_HOST_VERSION,
+        }
+  return {
+    mcpUrl: injected?.mcpUrl ?? env?.mcpUrl ?? 'ws://127.0.0.1:7529/app?token=dev',
+    appId: injected?.appId ?? env?.appId ?? 'dev-device',
+    platform: injected?.platform ?? env?.platform ?? 'dev',
+    appVersion: injected?.appVersion ?? env?.appVersion ?? '0.0.0-dev',
+    ...(injected?.hostVersion === undefined && env?.hostVersion === undefined
+      ? {}
+      : { hostVersion: injected?.hostVersion ?? env?.hostVersion }),
+  }
 }
 
 /**
@@ -97,13 +130,14 @@ export function createDebugPlugin(ctx: Context, options: DebugPluginOptions): Di
 
 export function apply(ctx: Context): void {
   if (!isDevMode()) return
-  ctx.effect(() =>
-    createDebugPlugin(ctx, {
-      url: process.env.DC_DEV_MCP_URL ?? 'ws://127.0.0.1:7529/app?token=dev',
-      appId: process.env.DC_DEV_APP_ID ?? `${process.env.DC_DEV_PLATFORM ?? 'dev'}-device`,
-      platform: process.env.DC_DEV_PLATFORM ?? 'dev',
-      appVersion: process.env.DC_DEV_APP_VERSION ?? '0.0.0-dev',
-      hostVersion: process.env.DC_DEV_HOST_VERSION,
-    }),
-  )
+  ctx.effect(() => {
+    const config = devConfig()
+    return createDebugPlugin(ctx, {
+      url: config.mcpUrl!,
+      appId: config.appId!,
+      platform: config.platform!,
+      appVersion: config.appVersion!,
+      hostVersion: config.hostVersion,
+    })
+  })
 }
