@@ -71,9 +71,15 @@ async function main(): Promise<void> {
 
   const viteArgs = cli.args.filter(arg => !arg.startsWith('-'))
   const viteRoot = typeof viteArgs[0] === 'string' ? viteArgs[0] : undefined
+  // 把实际 ws 配对地址经 VITE_ 环境变量注入 Web 宿主，供 debug 插件读取
+  const viteEnv = {
+    ...process.env,
+    VITE_DELTA_DEV_MCP_URL: `ws://127.0.0.1:${port}/app?token=${config.token}`,
+  }
   const vite = spawn(resolveVpBin(), viteRoot === undefined ? ['dev'] : ['dev', viteRoot], {
     cwd: process.cwd(),
     stdio: ['ignore', 'pipe', 'pipe'],
+    env: viteEnv,
   })
   forward(vite)
   console.error(`[dev] vp dev pid=${String(vite.pid)}`)
