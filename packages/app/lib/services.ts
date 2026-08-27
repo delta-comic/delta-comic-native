@@ -17,6 +17,10 @@ import { SchedulerService } from '@delta-comic/scheduler'
 import { SearchService } from '@delta-comic/search'
 import { SubscribableRegistryService, SubscriptionService } from '@delta-comic/social'
 import { StorageService } from '@delta-comic/storage'
+import { registerBookshelfScreen } from '@delta-comic/ui-bookshelf'
+import { registerFollowScreen } from '@delta-comic/ui-follow'
+import { registerHomeScreen } from '@delta-comic/ui-home'
+import { registerMineScreen } from '@delta-comic/ui-mine'
 import type { Context } from 'cordis'
 import type { Kysely } from 'kysely'
 
@@ -54,5 +58,25 @@ export async function mountCoreServices(
     ...(seams.crashHooks === undefined ? {} : { crashHooks: seams.crashHooks }),
     ...(seams.sink === undefined ? {} : { sink: seams.sink }),
   })
+  registerFirstPartyScreens(ctx)
   return db
+}
+
+/**
+ * 注册官方四屏（底部导航 core/home·follow·bookshelf·mine）。
+ * 各屏以其需要的 ctx 服务为参数，缺省回调保持占位渲染。
+ */
+function registerFirstPartyScreens(ctx: Context): void {
+  registerHomeScreen(ctx.routeRegistry, { feed: ctx.feed })
+  registerFollowScreen(ctx.routeRegistry, {
+    subscriptions: ctx.subscriptions,
+    subscribables: ctx.subscribables,
+  })
+  registerBookshelfScreen(ctx.routeRegistry, {
+    history: ctx.history,
+    shelf: ctx.shelf,
+  })
+  registerMineScreen(ctx.routeRegistry, {
+    loader: ctx.pluginLoader,
+  })
 }

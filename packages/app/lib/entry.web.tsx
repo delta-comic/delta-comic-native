@@ -32,6 +32,14 @@ const seams: HostSeams = {
   ],
 }
 
+// Web 宿主开发期：__DEV__ 与调试桥配置全局，供 debug 插件（预构建工件）读取。
+;(globalThis as Record<string, unknown>).__DEV__ = true
+;(globalThis as Record<string, unknown>).__DELTA_DEV__ = {
+  appId: 'web-device',
+  platform: 'web',
+  appVersion: '0.0.0-dev',
+}
+
 const root = createRoot(document.getElementById('root')!)
 createApp(new Context(), seams)
   .then(app => root.render(<AppRoot app={app} />))
