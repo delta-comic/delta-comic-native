@@ -51,7 +51,7 @@ describe('discoverFromArtifact', () => {
 
   it('无平台覆盖时回落 common', async () => {
     const { zip } = makeFixture()
-    const evaluator = fakeEvaluator(null)
+    const evaluator = fakeEvaluator({ apply() {} })
     const discovered: DiscoveredPlugin = discoverFromArtifact(zip, {
       platform: 'android',
       evaluator,

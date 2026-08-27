@@ -19,10 +19,10 @@ export interface ExpoImageProps {
 }
 
 const RESIZE_MODE: Record<ContentFit, NonNullable<RNWImageProps['resizeMode']>> = {
-  cover: 'cover',
-  contain: 'contain',
-  fill: 'stretch',
-  none: 'center',
+  'cover': 'cover',
+  'contain': 'contain',
+  'fill': 'stretch',
+  'none': 'center',
   'scale-down': 'contain',
 }
 

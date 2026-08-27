@@ -45,3 +45,6 @@ packages/app/public/runtime/
 *.tsbuildinfo
 packages/*/android/.tauri
 packages/*/android/.gradle
+
+# dcd 审计运行时产物
+.delta-dev-mcp.audit.jsonl

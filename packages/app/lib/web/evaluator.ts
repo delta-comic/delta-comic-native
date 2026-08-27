@@ -30,6 +30,9 @@ export function createViteEsmEvaluator(): ModuleEvaluator {
       if (!isBare(id)) return match
       return `from ${quote}${origin}/@id/${id}${quote}`
     })
-    return (await base({ path: entry.path, bytes: new TextEncoder().encode(rewritten) })) as EntryModule
+    return (await base({
+      path: entry.path,
+      bytes: new TextEncoder().encode(rewritten),
+    })) as EntryModule
   }
 }

@@ -1,3 +1,4 @@
+import { RangeUnsupportedError } from '@delta-comic/protocol'
 /**
  * DownloadService：下载任务编排（断点续传 / 校验 / 并发泵）。
  *
@@ -8,8 +9,6 @@
  */
 import { sha256 } from '@noble/hashes/sha2.js'
 import { bytesToHex } from '@noble/hashes/utils.js'
-
-import { RangeUnsupportedError } from '@delta-comic/protocol'
 import { Service, type Context } from 'cordis'
 
 import { DownloadTaskRepository, type StoredDownloadTask } from './repository'

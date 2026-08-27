@@ -72,11 +72,6 @@ function registerFirstPartyScreens(ctx: Context): void {
     subscriptions: ctx.subscriptions,
     subscribables: ctx.subscribables,
   })
-  registerBookshelfScreen(ctx.routeRegistry, {
-    history: ctx.history,
-    shelf: ctx.shelf,
-  })
-  registerMineScreen(ctx.routeRegistry, {
-    loader: ctx.pluginLoader,
-  })
+  registerBookshelfScreen(ctx.routeRegistry, { history: ctx.history, shelf: ctx.shelf })
+  registerMineScreen(ctx.routeRegistry, { loader: ctx.pluginLoader })
 }

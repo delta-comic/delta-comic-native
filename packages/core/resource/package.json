@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@delta-comic/db": "workspace:*",
-    "@noble/hashes": "catalog:",
     "@delta-comic/protocol": "workspace:*",
+    "@noble/hashes": "catalog:",
     "cordis": "catalog:",
     "kysely": "catalog:"
   },

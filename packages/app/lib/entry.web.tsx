@@ -1,7 +1,5 @@
 import '@delta-comic/ui-theme/theme.css'
-
 import './global.css'
-
 import { Context } from 'cordis'
 /**
  * Web 入口：装配宿主（内存 sql.js + runtime 目录来源）并挂载 DOM。
@@ -44,6 +42,7 @@ const seams: HostSeams = {
 
 const root = createRoot(document.getElementById('root')!)
 const ctx = new Context()
+
 // Web 宿主开发期：把 logger 诊断转发到浏览器 console，便于观察 loader/discovery 错误。
 ctx.logger.exporter({
   export(message: { type?: string; name?: string; args?: unknown[] }) {
@@ -53,7 +52,9 @@ ctx.logger.exporter({
   },
 })
 createApp(ctx, seams)
-  .then(app => root.render(<AppRoot app={app} />))
+  .then(app => {
+    root.render(<AppRoot app={app} />)
+  })
   .catch(error => {
     console.error('宿主启动失败', error)
     root.render(<pre>{String(error)}</pre>)
