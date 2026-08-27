@@ -9,7 +9,7 @@ export interface RuntimeIndexEntry {
   readonly file: string
 }
 
-const RUNTIME_BASE = 'runtime/'
+const RUNTIME_BASE = '/runtime/'
 
 export function createWebPackageFs(): PackageFs {
   return {
@@ -21,6 +21,6 @@ export function createWebPackageFs(): PackageFs {
         .map(entry => entry.file)
         .filter((file): file is string => file.endsWith('.zip'))
     },
-    readFile: path => fetch(path).then(response => response.bytes()),
+    readFile: path => fetch(`${RUNTIME_BASE}${path.replace(/^runtime\//, '')}`).then(response => response.bytes()),
   }
 }
