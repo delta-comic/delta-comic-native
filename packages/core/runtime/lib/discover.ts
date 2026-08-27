@@ -65,14 +65,18 @@ async function resolveEntry(
     throw new ArtifactError('entry-missing', `入口内容与 sha256 不符：${entry.path}`)
   }
   const module = await options.evaluator({ path: entry.path, bytes })
-  const plugin = module.default
-  if (typeof plugin !== 'function' && typeof plugin !== 'object') {
-    throw new ArtifactError(
-      'entry-missing',
-      `入口缺少 default 导出（Cordis plugin）：${entry.path}`,
-    )
+  // 与 cordis loader 对齐：先取 default，无则回退 namespace（named exports with apply）。
+  const candidate = module.default ?? module
+  if (typeof candidate === 'function') return candidate as Plugin
+  if (typeof candidate === 'object' && candidate !== null) {
+    if (typeof (candidate as Record<string, unknown>).apply === 'function') {
+      return candidate as Plugin
+    }
   }
-  return module.default as Plugin
+  throw new ArtifactError(
+    'entry-missing',
+    `入口缺少 default 导出或 apply（Cordis plugin）：${entry.path}`,
+  )
 }
 
 /** 解析 migrations/*.sql 文件对：<n>-<name>.up.sql 必须有同名 .down.sql；按 n 升序。 */
