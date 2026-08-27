@@ -6,7 +6,8 @@
  * - 从头取回才校验 checksum（流式摘要只覆盖增量字节），大小始终校验
  * - 每次状态跃迁持久化并广播；进度变化仅通知订阅者
  */
-import { createHash } from 'node:crypto'
+import { sha256 } from '@noble/hashes/sha2.js'
+import { bytesToHex } from '@noble/hashes/utils.js'
 
 import { RangeUnsupportedError } from '@delta-comic/protocol'
 import { Service, type Context } from 'cordis'
@@ -61,8 +62,8 @@ export class ChecksumMismatchError extends Error {
 
 const defaultHashers: Readonly<Record<string, () => DigestStream>> = {
   sha256: () => {
-    const hash = createHash('sha256')
-    return { update: chunk => hash.update(chunk), digestHex: () => hash.digest('hex') }
+    const hash = sha256.create()
+    return { update: chunk => hash.update(chunk), digestHex: () => bytesToHex(hash.digest()) }
   },
 }
 

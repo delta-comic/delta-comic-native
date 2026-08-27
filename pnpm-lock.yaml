@@ -290,6 +290,18 @@ importers:
       '@delta-comic/storage':
         specifier: workspace:*
         version: link:../core/storage
+      '@delta-comic/ui-bookshelf':
+        specifier: workspace:*
+        version: link:../ui/bookshelf
+      '@delta-comic/ui-follow':
+        specifier: workspace:*
+        version: link:../ui/follow
+      '@delta-comic/ui-home':
+        specifier: workspace:*
+        version: link:../ui/home
+      '@delta-comic/ui-mine':
+        specifier: workspace:*
+        version: link:../ui/mine
       '@delta-comic/ui-recovery':
         specifier: workspace:*
         version: link:../ui/recovery
@@ -610,6 +622,9 @@ importers:
       '@delta-comic/protocol':
         specifier: workspace:*
         version: link:../protocol
+      '@noble/hashes':
+        specifier: 'catalog:'
+        version: 2.3.0
       cordis:
         specifier: 'catalog:'
         version: 4.0.0-rc.8
